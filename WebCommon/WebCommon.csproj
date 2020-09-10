@@ -4,4 +4,30 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Attributes\" />
+    <Folder Include="BaseControllers\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8"><PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
+<Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+</PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\BusinessLayer\BusinessLayer.csproj" />
+  </ItemGroup>
 </Project>

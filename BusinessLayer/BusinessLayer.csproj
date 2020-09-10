@@ -4,4 +4,17 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Implementations\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Context\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
+  </ItemGroup>
 </Project>
