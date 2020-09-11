@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using Models;
+using Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
+using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class QuizAttemptsController : ControllerBase
+    public class QuizAttemptsController : AuthController
     {
         [HttpGet]
         public IEnumerable<QuizAttempt> Get()

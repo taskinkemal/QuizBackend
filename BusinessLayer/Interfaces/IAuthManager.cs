@@ -1,26 +1,22 @@
 ﻿using Common.Interfaces;
-using Models;
+using Models.TransferObjects;
 
 namespace BusinessLayer.Interfaces
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public interface IAuthManager : IDependency
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="accessToken"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<UserToken> VerifyAccessToken(string accessToken);
+        System.Threading.Tasks.Task<AuthToken> VerifyAccessToken(string accessToken);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="deviceId"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<UserToken> GenerateTokenAsync(int userId, string deviceId);
+        System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(int userId, string deviceId);
+
+        System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(TokenRequest request);
+
+        System.Threading.Tasks.Task<AuthToken> UpsertUserAsync(User user);
+
+        System.Threading.Tasks.Task<bool> DeleteUserAsync(int userId);
+
+        System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email);
+
+        System.Threading.Tasks.Task<AuthToken> VerifyAccount(OneTimeTokenRequest request);
     }
 }

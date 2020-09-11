@@ -1,7 +1,7 @@
 ﻿using Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Models;
+using Models.DbModels;
 
 namespace BusinessLayer.Context
 {
@@ -28,9 +28,13 @@ namespace BusinessLayer.Context
 
             modelBuilder.Entity<UserToken>()
                 .HasKey(c => new { c.UserId, c.DeviceId });
+
+            modelBuilder.Entity<OneTimeToken>()
+                .HasKey(c => c.Id);
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<OneTimeToken> OneTimeTokens { get; set; }
     }
 }

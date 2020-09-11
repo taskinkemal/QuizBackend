@@ -1,5 +1,6 @@
 ﻿using System;
-namespace Models
+
+namespace Models.DbModels
 {
     public class QuizAttempt
     {

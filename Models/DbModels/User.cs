@@ -1,4 +1,4 @@
-﻿namespace Models
+﻿namespace Models.DbModels
 {
     public class User
     {
@@ -11,5 +11,9 @@
         public string LastName { get; set; }
 
         public string PictureUrl { get; set; }
+
+        public byte[] PasswordHash { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

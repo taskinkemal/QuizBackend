@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Common;
 using Common.Interfaces;
-using Common.Managers;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Implementations;
 using BusinessLayer.Context;
+using Common.Implementations;
 
 namespace WebApplication
 {
@@ -96,6 +96,7 @@ namespace WebApplication
         private void InjectDependencies(IServiceCollection services)
         {
             services.AddSingleton<ILogManager, LogManager>();
+            services.AddSingleton<IEmailManager, EmailManager>();
 
             services.AddScoped<IAuthManager, AuthManager>();
         }

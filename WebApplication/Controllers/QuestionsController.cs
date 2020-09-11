@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using Models;
+using Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
+using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class QuestionsController : ControllerBase
+    public class QuestionsController : AuthController
     {
         [HttpGet]
         [Route("Quiz/{id}")]
