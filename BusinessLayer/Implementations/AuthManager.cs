@@ -138,13 +138,31 @@ namespace BusinessLayer.Implementations
 
         public async System.Threading.Tasks.Task<AuthToken> UpsertUserAsync(Models.TransferObjects.User user)
         {
-            var userId = await InsertUserInternalAsync(user);
+            var found = await Context.Users.FirstAsync(u => u.Email == user.Email);
 
-            //TODO: send email.
+            if (found == null)
+            {
+                var userId = await InsertUserInternalAsync(user);
 
-            var token = await GenerateTokenAsync(userId, user.DeviceId);
+                var token = await GenerateTokenAsync(userId, user.DeviceId);
 
-            return token;
+                return token;
+            }
+            else
+            {
+                found.FirstName = user.FirstName;
+                found.LastName = user.LastName;
+                found.PictureUrl = user.PictureUrl;
+
+                Context.Users.Update(found);
+
+                await Context.SaveChangesAsync();
+
+                return new AuthToken
+                {
+                    Token = ""
+                };
+            }
         }
 
         public async System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email)
@@ -214,6 +232,8 @@ namespace BusinessLayer.Implementations
             });
 
             await Context.SaveChangesAsync();
+
+            await SendAccountVerificationEmail(user.Email);
 
             return u.Entity.Id;
         }

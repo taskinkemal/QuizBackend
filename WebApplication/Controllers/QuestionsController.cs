@@ -35,7 +35,7 @@ namespace WebApplication.Controllers
                     Body = "Is this true or false.",
                     Level = 2,
                     PoolIds = new List<int> { 3 },
-                    QuestionType = QuestionType.YesNo,
+                    QuestionType = QuestionType.TrueFalse,
                     CorrectOptionIds = new List<int> { 1 },
                     Tags = new List<string> { "Sample", "Easy Questions" }
                 });

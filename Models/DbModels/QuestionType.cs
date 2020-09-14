@@ -6,7 +6,7 @@ namespace Models.DbModels
     {
         MultiSelect,
         MultiSelectMultiOptions,
-        YesNo,
+        TrueFalse,
         Match
     }
 }

@@ -16,6 +16,10 @@ using BusinessLayer.Interfaces;
 using BusinessLayer.Implementations;
 using BusinessLayer.Context;
 using Common.Implementations;
+using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace WebApplication
 {
@@ -91,6 +95,8 @@ namespace WebApplication
             });
 
             InjectDependencies(services);
+
+            ConfigureServiceSwagger(services);
         }
 
         private void InjectDependencies(IServiceCollection services)
@@ -129,6 +135,19 @@ namespace WebApplication
                     "default",
                     "api/{controller}/{id?}");
             });
+
+            app.UseSwagger(c =>
+            {
+                c.PreSerializeFilters.Add((swagger, httpReq) => {
+                    swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
+                });
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("v1/swagger.json", "V1 Docs");
+                c.DocumentTitle = "Quiz API";
+            });
         }
 
         private void SetNewtonsoftSerializerSettings(JsonSerializerSettings serializerSettings)
@@ -138,6 +157,40 @@ namespace WebApplication
             serializerSettings.ContractResolver = new DefaultContractResolver();
             serializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
             serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        }
+
+        private void ConfigureServiceSwagger(IServiceCollection services)
+        {
+            services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Please insert the access token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey
+                    });
+            });
+
+            services.ConfigureSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1",
+                    new OpenApiInfo
+                    {
+                        Title = "Quiz API",
+                        Version = "v1",
+                        Description = "Quiz Web API Documentation"
+                    });
+
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "WebApplication.xml"));
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "BusinessLayer.xml"));
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Common.xml"));
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Models.xml"));
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "WebCommon.xml"));
+            });
+
+            services.AddSwaggerGenNewtonsoftSupport();
         }
     }
 }

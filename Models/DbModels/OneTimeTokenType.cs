@@ -5,6 +5,6 @@ namespace Models.DbModels
     {
         SSO = 1,
         AccountVerification = 2,
-        PasswordChange = 3
+        ForgotPassword = 3
     }
 }
