@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using BusinessLayer.Context;
@@ -25,6 +24,7 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="context"></param>
         /// <param name="logManager"></param>
+        /// <param name="emailManager"></param>
         public AuthManager(QuizContext context, ILogManager logManager, IEmailManager emailManager) : base(context)
         {
             this.logManager = logManager;
@@ -52,13 +52,7 @@ namespace BusinessLayer.Implementations
             };
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="deviceId"></param>
-        /// <returns></returns>
-        public async System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(int userId, string deviceId)
+        private async System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(int userId, string deviceId)
         {
             AuthToken result;
 
@@ -105,6 +99,11 @@ namespace BusinessLayer.Implementations
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(TokenRequest request)
         {
             byte[] passwordHash;
@@ -126,6 +125,11 @@ namespace BusinessLayer.Implementations
             return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task<bool> DeleteUserAsync(int userId)
         {
             var user = await Context.Users.FindAsync(userId);
@@ -136,6 +140,11 @@ namespace BusinessLayer.Implementations
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task<AuthToken> UpsertUserAsync(Models.TransferObjects.User user)
         {
             var found = await Context.Users.FirstAsync(u => u.Email == user.Email);
@@ -165,6 +174,11 @@ namespace BusinessLayer.Implementations
             }
         }
 
+        /// <summary>
+        /// Send account verification email.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email)
         {
             var user = await Context.Users.FirstAsync(u => u.Email == email && !u.IsVerified);
@@ -191,6 +205,11 @@ namespace BusinessLayer.Implementations
             return false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task<AuthToken> VerifyAccount(OneTimeTokenRequest request)
         {
             var oneTimeToken = await Context.OneTimeTokens.FirstOrDefaultAsync(t =>

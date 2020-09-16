@@ -8,8 +8,15 @@ namespace BusinessLayer.Implementations
     /// </summary>
     public abstract class ManagerBase
     {
-        protected QuizContext Context;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected QuizContext Context { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
         protected ManagerBase(QuizContext context)
         {
             Context = context;

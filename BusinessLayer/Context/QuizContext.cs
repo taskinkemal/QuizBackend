@@ -1,6 +1,4 @@
-﻿using Common;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using Models.DbModels;
 
 namespace BusinessLayer.Context
@@ -10,17 +8,18 @@ namespace BusinessLayer.Context
     /// </summary>
     public class QuizContext : DbContext
     {
-        private readonly IOptions<AppSettings> settings;
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="options"></param>
-        public QuizContext(DbContextOptions<QuizContext> options, IOptions<AppSettings> settings) : base(options)
+        public QuizContext(DbContextOptions<QuizContext> options) : base(options)
         {
-            this.settings = settings;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -33,8 +32,19 @@ namespace BusinessLayer.Context
                 .HasKey(c => c.Id);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<User> Users { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<UserToken> UserTokens { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public DbSet<OneTimeToken> OneTimeTokens { get; set; }
     }
 }

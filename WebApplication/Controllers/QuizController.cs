@@ -5,6 +5,9 @@ using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
+    /// <summary>
+    /// Quiz related actions.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class QuizController : AuthController

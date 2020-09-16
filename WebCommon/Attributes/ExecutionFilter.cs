@@ -32,6 +32,10 @@ namespace WebCommon.Attributes
             this.authenticationRequired = authenticationRequired;
         }
 
+        /// <summary>
+        /// Policy injection for all endpoints.
+        /// </summary>
+        /// <param name="context"></param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             RetrieveParameters(context, out var accessToken);
@@ -51,80 +55,6 @@ namespace WebCommon.Attributes
                 };
             }
         }
-
-        //public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-        //{
-        //    RetrieveParameters(context, out var accessToken);
-        //    SetCulture();
-
-        //    var result = await ValidateRequest(context, accessToken);
-
-        //    if (result.isValid || !authenticationRequired)
-        //    {
-        //        //await next();
-        //        await base.OnActionExecutionAsync(context, next);
-        //    }
-        //    else
-        //    {
-        //        context.Result = new JsonResult(new HttpErrorMessage(result.errPhrase, result.errMessage))
-        //        {
-        //            StatusCode = (int)HttpStatusCode.Unauthorized
-        //        };
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="context"></param>
-        //public override void OnResultExecuting(ResultExecutingContext context)
-        //{
-        //    var obj = (context.Result as JsonResult)?.Value;
-
-        //    if (obj != null)
-        //    {
-        //        var rootFieldName = ClassNameHelper.GetRootFieldName(obj.GetType());
-
-        //        if (!string.IsNullOrWhiteSpace(rootFieldName))
-        //        {
-        //            var data = new JObject
-        //            {
-        //                { rootFieldName, JObject.FromObject(obj) }
-        //            };
-
-        //            (context.Result as JsonResult).Value = data;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        obj = (context.Result as ObjectResult)?.Value;
-
-        //        if (obj != null)
-        //        {
-        //            var objType = obj.GetType();
-
-        //            if (objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(List<>))
-        //            {
-        //                (context.Result as ObjectResult).Value = (obj as IEnumerable<dynamic>)?.Take(AppSettings.MaxRows);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (context.Result is JsonResult)
-        //            {
-        //                (context.Result as JsonResult).StatusCode = (int)HttpStatusCode.NotFound;
-        //                (context.Result as JsonResult).Value = new HttpErrorMessage("ItemNotFound", Resources.errItemNotFound);
-        //            }
-        //            else if (context.Result is ObjectResult)
-        //            {
-        //                (context.Result as ObjectResult).StatusCode = (int)HttpStatusCode.NotFound;
-        //                (context.Result as ObjectResult).Value = new HttpErrorMessage("ItemNotFound", Resources.errItemNotFound);
-        //            }
-        //        }
-        //    }
-
-        //    base.OnResultExecuting(context);
-        //}
 
         private async Task<(bool isValid, string errPhrase, string errMessage)> ValidateRequest(ActionExecutingContext context, string accessToken)
         {

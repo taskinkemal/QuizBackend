@@ -29,6 +29,11 @@ namespace WebCommon.Attributes
             this.logManager = logManager;
         }
 
+        /// <summary>
+        /// Captures unhandled exceptions.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public override Task OnExceptionAsync(ExceptionContext context)
         {
             logManager.AddLog(context.Exception);

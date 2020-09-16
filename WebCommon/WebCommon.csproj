@@ -26,6 +26,8 @@
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
   </ItemGroup>
   <ItemGroup>
