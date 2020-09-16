@@ -1,6 +1,6 @@
 ﻿namespace Models.TransferObjects
 {
-    public class AccountVerificationRequest
+    public class EmailRequest
     {
         public string Email { get; set; }
     }

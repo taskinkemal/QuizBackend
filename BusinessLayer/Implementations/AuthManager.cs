@@ -38,9 +38,7 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async System.Threading.Tasks.Task<AuthToken> VerifyAccessToken(string accessToken)
         {
-            var token = await Context.UserTokens.FirstOrDefaultAsync(t =>
-                t.Token == accessToken &&
-                t.ValidUntil > DateTime.Now);
+            var token = await GetAccessToken(accessToken);
 
             var user = await Context.Users.FindAsync(token.UserId);
 
@@ -50,6 +48,93 @@ namespace BusinessLayer.Implementations
                 Token = token.Token,
                 ValidUntil = token.ValidUntil
             };
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email)
+        {
+            var user = await Context.Users.FirstAsync(u => u.Email == email && !u.IsVerified);
+
+            var token = GenerateRandomString(160);
+
+            Context.OneTimeTokens.Add(new Models.DbModels.OneTimeToken
+            {
+                Email = email,
+                Token = token,
+                TokenType = (byte)OneTimeTokenType.ForgotPassword,
+                ValidUntil = DateTime.Now.AddDays(1)
+            });
+
+            await Context.SaveChangesAsync();
+
+            if (user != null)
+            {
+                emailManager.Send(email, "Reset your password", "Here is your token: " + token);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="oneTimeToken"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<bool> UpdatePassword(string accessToken, string oneTimeToken, string password)
+        {
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                var token = await GetAccessToken(accessToken);
+
+                if (token != null)
+                {
+                    var result = await UpdatePassword(token.UserId, password);
+                    return result;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(oneTimeToken))
+            {
+                var token = await Context.OneTimeTokens.FirstOrDefaultAsync(t =>
+                    t.Token == oneTimeToken &&
+                    t.TokenType == (byte)OneTimeTokenType.ForgotPassword &&
+                    t.ValidUntil > DateTime.Now);
+
+                var user = await Context.Users.FirstAsync(u => u.Email == token.Email && !u.IsVerified);
+
+                if (user != null)
+                {
+                    var result = await UpdatePassword(user.Id, password);
+
+                    Context.OneTimeTokens.Remove(token);
+
+                    await Context.SaveChangesAsync();
+
+                    return result;
+                }
+            }
+
+            return false;
+        }
+
+        private async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string password)
+        {
+            var user = await Context.Users.FindAsync(userId);
+
+            user.PasswordHash = EncryptPassword(password);
+
+            Context.Users.Update(user);
+
+            await Context.SaveChangesAsync();
+
+            return true;
         }
 
         private async System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(int userId, string deviceId)
@@ -231,14 +316,35 @@ namespace BusinessLayer.Implementations
             return token;
         }
 
-        private async System.Threading.Tasks.Task<int> InsertUserInternalAsync(Models.TransferObjects.User user)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<Models.DbModels.UserToken> GetAccessToken(string accessToken)
+        {
+            var token = await Context.UserTokens.FirstOrDefaultAsync(t =>
+                t.Token == accessToken &&
+                t.ValidUntil > DateTime.Now);
+
+            return token;
+        }
+
+        private byte[] EncryptPassword(string password)
         {
             byte[] passwordHash;
 
             using (var shaM = new SHA512Managed())
             {
-                passwordHash = shaM.ComputeHash(Encoding.UTF8.GetBytes(user.Password));
+                passwordHash = shaM.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
+
+            return passwordHash;
+        }
+
+        private async System.Threading.Tasks.Task<int> InsertUserInternalAsync(Models.TransferObjects.User user)
+        {
+            var passwordHash = EncryptPassword(user.Password);
 
             var u = Context.Users.Add(new Models.DbModels.User
             {

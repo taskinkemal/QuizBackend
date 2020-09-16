@@ -49,5 +49,28 @@ namespace BusinessLayer.Interfaces
         /// <param name="request"></param>
         /// <returns></returns>
         System.Threading.Tasks.Task<AuthToken> VerifyAccount(OneTimeTokenRequest request);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<Models.DbModels.UserToken> GetAccessToken(string accessToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="oneTimeToken"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<bool> UpdatePassword(string accessToken, string oneTimeToken, string password);
     }
 }

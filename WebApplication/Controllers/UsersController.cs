@@ -43,7 +43,7 @@ namespace WebApplication.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("SendVerificationEmail")]
-        public async Task<bool> PostSendVerificationEmail([FromBody] AccountVerificationRequest data)
+        public async Task<bool> PostSendVerificationEmail([FromBody] EmailRequest data)
         {
             await authManager.SendAccountVerificationEmail(data.Email);
             return true;
