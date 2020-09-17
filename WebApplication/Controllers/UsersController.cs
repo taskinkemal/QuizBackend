@@ -31,9 +31,10 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPut]
         [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Conflict)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
         public async Task<JsonResult> Put([FromBody] User user)
         {
             var result = await userManager.InsertUserAsync(user);
