@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
+using Common;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
 using WebCommon.BaseControllers;
@@ -13,27 +15,54 @@ namespace WebApplication.Controllers
     [Route("[controller]")]
     public class UsersController : NoAuthController
     {
-        private readonly IAuthManager authManager;
+        private readonly IUserManager userManager;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="authManager"></param>
-        public UsersController(IAuthManager authManager)
+        /// <param name="userManager"></param>
+        public UsersController(IUserManager userManager)
         {
-            this.authManager = authManager;
+            this.userManager = userManager;
         }
 
         /// <summary>
-        /// Add or update a user.
+        /// Add a user.
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<AuthToken> Post([FromBody] User user)
+        [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        public async Task<JsonResult> Put([FromBody] User user)
         {
-            var token = await authManager.UpsertUserAsync(user);
-            return token;
+            var result = await userManager.InsertUserAsync(user);
+
+            switch (result.Response)
+            {
+                case InsertUserResponse.Success:
+                    return CreateResponse(result.Value);
+                case InsertUserResponse.EmailExists:
+                    return CreateErrorResponse(HttpStatusCode.Conflict, "EmailExists");
+                case InsertUserResponse.PasswordCriteriaNotSatisfied:
+                    return CreateErrorResponse(HttpStatusCode.NotAcceptable, "PasswordCriteriaNotSatisfied");
+                default:
+                    return CreateErrorResponse(HttpStatusCode.InternalServerError, "SystemError");
+            }
+        }
+
+        /// <summary>
+        /// Update user.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        public async Task<JsonResult> Post([FromBody] User user)
+        {
+            var result = await userManager.UpdateUserAsync(AccessTokenString, user);
+            return result ? CreateResponse(true) : CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
 
         /// <summary>
@@ -45,8 +74,8 @@ namespace WebApplication.Controllers
         [Route("SendVerificationEmail")]
         public async Task<bool> PostSendVerificationEmail([FromBody] EmailRequest data)
         {
-            await authManager.SendAccountVerificationEmail(data.Email);
-            return true;
+            var result = await userManager.SendAccountVerificationEmail(data.Email);
+            return result;
         }
 
         /// <summary>
@@ -58,7 +87,7 @@ namespace WebApplication.Controllers
         [Route("VerifyAccount")]
         public async Task<AuthToken> PostVerifyAccount([FromBody] OneTimeTokenRequest data)
         {
-            var token = await authManager.VerifyAccount(data);
+            var token = await userManager.VerifyAccount(data);
             return token;
         }
 
@@ -70,8 +99,8 @@ namespace WebApplication.Controllers
         [HttpDelete]
         public async Task<bool> Delete(int id)
         {
-            await authManager.DeleteUserAsync(id);
-            return true;
+            var result = await userManager.DeleteUserAsync(id);
+            return result;
         }
     }
 }

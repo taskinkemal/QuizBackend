@@ -12,7 +12,6 @@
     <DocumentationFile>bin\Release\netcoreapp3.1\Models.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="TransferObjects\" />
     <Folder Include="DbModels\" />
   </ItemGroup>
 </Project>

@@ -3,16 +3,19 @@
     /// <summary>
     /// 
     /// </summary>
-    public class OneTimeTokenRequest
+    public enum InsertUserResponse
     {
         /// <summary>
         /// 
         /// </summary>
-        public string Token { get; set; }
-
+        Success,
         /// <summary>
         /// 
         /// </summary>
-        public string DeviceId { get; set; }
+        EmailExists,
+        /// <summary>
+        /// 
+        /// </summary>
+        PasswordCriteriaNotSatisfied
     }
 }

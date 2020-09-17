@@ -12,8 +12,6 @@
     <DocumentationFile>bin\Release\netcoreapp3.1\BusinessLayer.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Implementations\" />
-    <Folder Include="Interfaces\" />
     <Folder Include="Context\" />
   </ItemGroup>
   <ItemGroup>

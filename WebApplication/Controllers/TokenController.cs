@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
+using Common;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
 using WebCommon.BaseControllers;
@@ -30,11 +32,13 @@ namespace WebApplication.Controllers
         /// <param name="data"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<AuthToken> Post([FromBody] TokenRequest data)
+        [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        public async Task<JsonResult> Post([FromBody] TokenRequest data)
         {
             var token = await authManager.GenerateTokenAsync(data);
 
-            return token;
+            return token != null ? CreateResponse(token) : CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
     }
 }

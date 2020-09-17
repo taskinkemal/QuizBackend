@@ -11,13 +11,6 @@ namespace Common.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="exc"></param>
-        /// <returns></returns>
-        string GetExceptionDetails(Exception exc);
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="logMessage"></param>
         /// <param name="level"></param>
         void AddLog(string logMessage, LogEventLevel level = LogEventLevel.Information);

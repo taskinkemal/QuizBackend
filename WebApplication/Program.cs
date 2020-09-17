@@ -6,7 +6,7 @@ namespace WebApplication
     /// <summary>
     /// 
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
         /// 

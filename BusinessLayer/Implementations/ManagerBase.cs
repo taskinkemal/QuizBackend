@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Context;
+using Common.Interfaces;
 
 
 namespace BusinessLayer.Implementations
@@ -16,10 +17,17 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
+        protected ILogManager LogManager { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="context"></param>
-        protected ManagerBase(QuizContext context)
+        /// <param name="logManager"></param>
+        protected ManagerBase(QuizContext context, ILogManager logManager)
         {
             Context = context;
+            LogManager = logManager;
         }
     }
 }

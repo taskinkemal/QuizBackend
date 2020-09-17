@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
@@ -7,19 +6,22 @@ using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
+    /// <summary>
+    /// Password related actions.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PasswordController : NoAuthController
     {
-        private readonly IAuthManager authManager;
+        private readonly IUserManager userManager;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="authManager"></param>
-        public PasswordController(IAuthManager authManager)
+        /// <param name="userManager"></param>
+        public PasswordController(IUserManager userManager)
         {
-            this.authManager = authManager;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -33,6 +35,17 @@ namespace WebApplication.Controllers
         }
 
         /// <summary>
+        /// Validate the given password against security criteria.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ValidatePassword")]
+        public bool PostValidatePassword([FromBody] PasswordChangeRequest data)
+        {
+            return PasswordCriteria.IsValid(data.Password);
+        }
+
+        /// <summary>
         /// Send password reset request email.
         /// </summary>
         /// <param name="data"></param>
@@ -41,19 +54,19 @@ namespace WebApplication.Controllers
         [Route("SendPasswordResetEmail")]
         public async Task<bool> PostPasswordResetEmail([FromBody] EmailRequest data)
         {
-            var result = await authManager.SendPasswordResetEmail(data.Email);
+            var result = await userManager.SendPasswordResetEmail(data.Email);
             return result;
         }
 
         /// <summary>
-        /// Update user password
+        /// Update user password. Either the access token or the one time token must be present. Access token has priority over the one time token.
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
         [HttpPost]
         public async Task<bool> Post([FromBody] PasswordChangeRequest data)
         {
-            var result = await authManager.UpdatePassword(this.Token?.IsVerified == true ? this.Token.Token : "", data.Token, data.Password);
+            var result = await userManager.UpdatePassword(AccessTokenString, data.Token, data.Password);
             return result;
         }
     }

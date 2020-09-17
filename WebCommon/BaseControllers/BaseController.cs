@@ -8,17 +8,21 @@ using Models.TransferObjects;
 
 namespace WebCommon.BaseControllers
 {
-    /// <inheritdoc />
     /// <summary>
     /// </summary>
     [Route("api/[controller]")]
     [TypeFilter(typeof(ExceptionHandlerAttribute))]
-    public class BaseController : Controller
+    public class BaseController : ControllerBase
     {
         /// <summary>
         /// 
         /// </summary>
-        public AuthToken Token = null;
+        public AuthToken Token { get; set; } = null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected string AccessTokenString => Token?.IsVerified == true ? Token.Token : "";
 
         /// <summary>
         /// 
@@ -44,11 +48,10 @@ namespace WebCommon.BaseControllers
         /// </summary>
         /// <param name="statusCode"></param>
         /// <param name="code"></param>
-        /// <param name="message"></param>
         /// <returns></returns>
-        protected static JsonResult CreateErrorResponse(HttpStatusCode statusCode, string code, string message)
+        protected static JsonResult CreateErrorResponse(HttpStatusCode statusCode, string code)
         {
-            return new JsonResult(new HttpErrorMessage(code, message))
+            return new JsonResult(new HttpErrorMessage(code))
             {
                 StatusCode = (int)statusCode
             };

@@ -25,30 +25,10 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<AuthToken> UpsertUserAsync(User user);
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="userId"></param>
+        /// <param name="deviceId"></param>
         /// <returns></returns>
-        System.Threading.Tasks.Task<bool> DeleteUserAsync(int userId);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<AuthToken> VerifyAccount(OneTimeTokenRequest request);
+        System.Threading.Tasks.Task<AuthToken> GenerateTokenAsync(int userId, string deviceId);
 
         /// <summary>
         /// 
@@ -56,21 +36,5 @@ namespace BusinessLayer.Interfaces
         /// <param name="accessToken"></param>
         /// <returns></returns>
         System.Threading.Tasks.Task<Models.DbModels.UserToken> GetAccessToken(string accessToken);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="accessToken"></param>
-        /// <param name="oneTimeToken"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.Task<bool> UpdatePassword(string accessToken, string oneTimeToken, string password);
     }
 }

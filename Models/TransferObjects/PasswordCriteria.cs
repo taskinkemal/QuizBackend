@@ -1,4 +1,6 @@
-﻿namespace Models.TransferObjects
+﻿using System.Linq;
+
+namespace Models.TransferObjects
 {
     /// <summary>
     /// Password Criteria
@@ -11,7 +13,7 @@
         public int MinimumLength { get; set; } = 6;
 
         /// <summary>
-        /// Minimum alpabetic characters required.
+        /// Minimum alphabetic characters required.
         /// </summary>
         public int MinimumAlphabetic { get; set; } = 1;
 
@@ -19,5 +21,38 @@
         /// Minimum numeric characters required.
         /// </summary>
         public int MinimumNumeric { get; set; } = 1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool IsValid(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                return false;
+            }
+
+            var criteria = new PasswordCriteria();
+
+            if (password.Length < criteria.MinimumLength)
+            {
+                return false;
+            }
+
+            if (password.Count(char.IsDigit) < criteria.MinimumNumeric)
+            {
+                return false;
+            }
+
+
+            if (password.Count(char.IsLetter) < criteria.MinimumAlphabetic)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

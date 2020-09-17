@@ -69,7 +69,7 @@ namespace WebApplication
                 });
 
             services.AddDbContext<QuizContext>(
-                options => options.UseSqlServer(Configuration.GetSection("AppSettings").GetValue<string>("ConnectionString")), ServiceLifetime.Scoped);
+                options => options.UseSqlServer(Configuration.GetSection("AppSettings").GetValue<string>("ConnectionString")));
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -97,14 +97,17 @@ namespace WebApplication
             InjectDependencies(services);
 
             ConfigureServiceSwagger(services);
+
+            Environment.SetEnvironmentVariable("BASEDIR", PlatformServices.Default.Application.ApplicationBasePath);
         }
 
-        private void InjectDependencies(IServiceCollection services)
+        private static void InjectDependencies(IServiceCollection services)
         {
             services.AddSingleton<ILogManager, LogManager>();
             services.AddSingleton<IEmailManager, EmailManager>();
 
             services.AddScoped<IAuthManager, AuthManager>();
+            services.AddScoped<IUserManager, UserManager>();
         }
 
         /// <summary>
@@ -122,8 +125,6 @@ namespace WebApplication
             {
                 app.UseHsts();
             }
-
-            //app.UseHttpsRedirection();
 
             app.UseStaticFiles();
 
@@ -150,7 +151,7 @@ namespace WebApplication
             });
         }
 
-        private void SetNewtonsoftSerializerSettings(JsonSerializerSettings serializerSettings)
+        private static void SetNewtonsoftSerializerSettings(JsonSerializerSettings serializerSettings)
         {
             serializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
             serializerSettings.DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss";
@@ -159,7 +160,7 @@ namespace WebApplication
             serializerSettings.NullValueHandling = NullValueHandling.Ignore;
         }
 
-        private void ConfigureServiceSwagger(IServiceCollection services)
+        private static void ConfigureServiceSwagger(IServiceCollection services)
         {
             services.AddSwaggerGen(options =>
             {

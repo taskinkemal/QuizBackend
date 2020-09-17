@@ -5,7 +5,6 @@ using System;
 using System.Net;
 using Common;
 using Common.Interfaces;
-using WebCommon.Properties;
 using System.Threading.Tasks;
 
 namespace WebCommon.Attributes
@@ -39,23 +38,21 @@ namespace WebCommon.Attributes
             logManager.AddLog(context.Exception);
 
             HttpStatusCode status;
-            string code, message;
+            string code;
 
             if (context.Exception is NotImplementedException)
             {
                 status = HttpStatusCode.NotImplemented;
                 code = "MethodNotImplemented";
-                message = Resources.errMethodNotImplemented;
             }
             else
             {
                 status = HttpStatusCode.InternalServerError;
                 code = "SystemError";
-                message = Resources.errGeneral;
             }
 
             context.HttpContext.Response.StatusCode = (int)status;
-            context.Result = new JsonResult(new HttpErrorMessage(code, message));
+            context.Result = new JsonResult(new HttpErrorMessage(code));
 
             return base.OnExceptionAsync(context);
         }

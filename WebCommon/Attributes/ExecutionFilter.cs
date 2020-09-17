@@ -6,7 +6,6 @@ using System.Net;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Common;
-using WebCommon.Properties;
 using WebCommon.BaseControllers;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
@@ -49,17 +48,16 @@ namespace WebCommon.Attributes
             }
             else
             {
-                context.Result = new JsonResult(new HttpErrorMessage(result.errPhrase, result.errMessage))
+                context.Result = new JsonResult(new HttpErrorMessage(result.errPhrase))
                 {
                     StatusCode = (int)HttpStatusCode.Unauthorized
                 };
             }
         }
 
-        private async Task<(bool isValid, string errPhrase, string errMessage)> ValidateRequest(ActionExecutingContext context, string accessToken)
+        private async Task<(bool isValid, string errPhrase)> ValidateRequest(ActionExecutingContext context, string accessToken)
         {
-            var errPhrase = "";
-            var errMessage = "";
+            string errPhrase;
 
             if (accessToken != null)
             {
@@ -75,32 +73,28 @@ namespace WebCommon.Attributes
                         else
                         {
                             errPhrase = "AccountNotVerified";
-                            errMessage = Resources.errAccountNotVerified;
-                            return (false, errPhrase, errMessage);
+                            return (false, errPhrase);
                         }
                     }
                     else
                     {
                         errPhrase = "InvalidToken";
-                        errMessage = Resources.errInvalidToken;
-                        return (false, errPhrase, errMessage);
+                        return (false, errPhrase);
                     }
                 }
                 else
                 {
                     errPhrase = "InvalidController";
-                    errMessage = Resources.errInvalidController;
-                    return (false, errPhrase, errMessage);
+                    return (false, errPhrase);
                 }
             }
             else
             {
                 errPhrase = "InvalidToken";
-                errMessage = Resources.errInvalidToken;
-                return (false, errPhrase, errMessage);
+                return (false, errPhrase);
             }
 
-            return (true, "", "");
+            return (true, "");
         }
 
         private static void RetrieveParameters(ActionContext context, out string accessToken)
