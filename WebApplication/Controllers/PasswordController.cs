@@ -2,6 +2,7 @@
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
+using WebCommon.Attributes;
 using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
@@ -63,10 +64,11 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
+        [Authenticate]
         [HttpPost]
         public async Task<bool> Post([FromBody] PasswordChangeRequest data)
         {
-            var result = await userManager.UpdatePassword(AccessTokenString, data.Token, data.Password);
+            var result = await userManager.UpdatePassword(Token.UserId, data.Token, data.Password);
             return result;
         }
     }

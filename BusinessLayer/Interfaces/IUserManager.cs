@@ -18,11 +18,11 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="accessToken"></param>
+        /// <param name="userId"></param>
         /// <param name="oneTimeToken"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        System.Threading.Tasks.Task<bool> UpdatePassword(string accessToken, string oneTimeToken, string password);
+        System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string oneTimeToken, string password);
 
         /// <summary>
         /// 
@@ -41,10 +41,10 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="accessToken"></param>
+        /// <param name="userId"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        System.Threading.Tasks.Task<bool> UpdateUserAsync(string accessToken, User user);
+        System.Threading.Tasks.Task<bool> UpdateUserAsync(int userId, User user);
 
         /// <summary>
         /// 

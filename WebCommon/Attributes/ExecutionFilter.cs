@@ -9,6 +9,7 @@ using Common;
 using WebCommon.BaseControllers;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
+using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace WebCommon.Attributes
 {
@@ -42,7 +43,7 @@ namespace WebCommon.Attributes
 
             var result = ValidateRequest(context, accessToken).Result;
 
-            if (result.isValid || !authenticationRequired)
+            if (result.isValid || !(authenticationRequired || HasAuthenticateAttribute(context)))
             {
                 base.OnActionExecuting(context);
             }
@@ -119,6 +120,20 @@ namespace WebCommon.Attributes
         {
             Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+        }
+
+        private static bool HasAuthenticateAttribute(ActionExecutingContext context)
+        {
+            var controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
+
+            if (controllerActionDescriptor != null)
+            {
+                // Check if the attribute exists on the action method
+                if (controllerActionDescriptor.MethodInfo?.GetCustomAttributes(inherit: true)?.Any(a => a.GetType().Equals(typeof(AuthenticateAttribute))) ?? false)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

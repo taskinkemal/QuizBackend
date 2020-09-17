@@ -22,11 +22,6 @@ namespace WebCommon.BaseControllers
         /// <summary>
         /// 
         /// </summary>
-        protected string AccessTokenString => Token?.IsVerified == true ? Token.Token : "";
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="result"></param>
         /// <returns></returns>

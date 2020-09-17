@@ -4,6 +4,7 @@ using BusinessLayer.Interfaces;
 using Common;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
+using WebCommon.Attributes;
 using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
@@ -58,11 +59,12 @@ namespace WebApplication.Controllers
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPost]
+        [Authenticate]
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
         public async Task<JsonResult> Post([FromBody] User user)
         {
-            var result = await userManager.UpdateUserAsync(AccessTokenString, user);
+            var result = await userManager.UpdateUserAsync(Token.UserId, user);
             return result ? CreateResponse(true) : CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
 

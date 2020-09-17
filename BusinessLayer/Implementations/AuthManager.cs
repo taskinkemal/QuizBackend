@@ -38,7 +38,8 @@ namespace BusinessLayer.Implementations
             {
                 IsVerified = user.IsVerified,
                 Token = token.Token,
-                ValidUntil = token.ValidUntil
+                ValidUntil = token.ValidUntil,
+                UserId = user.Id
             };
         }
 
@@ -85,6 +86,7 @@ namespace BusinessLayer.Implementations
 
                 result = new AuthToken
                 {
+                    UserId = user.Id,
                     IsVerified = user.IsVerified,
                     Token = existingToken.Token,
                     ValidUntil = existingToken.ValidUntil
@@ -95,6 +97,7 @@ namespace BusinessLayer.Implementations
                 var token = AuthenticationHelper.GenerateToken(userId);
                 var newToken = new AuthToken
                 {
+                    UserId = user.Id,
                     IsVerified = user.IsVerified,
                     Token = token,
                     ValidUntil = DateTime.Now.AddYears(1)

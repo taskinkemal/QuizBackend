@@ -64,21 +64,16 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="accessToken"></param>
+        /// <param name="userId"></param>
         /// <param name="oneTimeToken"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdatePassword(string accessToken, string oneTimeToken, string password)
+        public async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string oneTimeToken, string password)
         {
-            if (!string.IsNullOrWhiteSpace(accessToken))
+            if (userId > 0)
             {
-                var token = await authManager.GetAccessToken(accessToken);
-
-                if (token != null)
-                {
-                    var result = await UpdatePassword(token.UserId, password);
-                    return result;
-                }
+                var result = await UpdatePassword(userId, password);
+                return result;
             }
             else if (!string.IsNullOrWhiteSpace(oneTimeToken))
             {
@@ -148,21 +143,19 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="accessToken"></param>
+        /// <param name="userId"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdateUserAsync(string accessToken, Models.TransferObjects.User user)
+        public async System.Threading.Tasks.Task<bool> UpdateUserAsync(int userId, Models.TransferObjects.User user)
         {
-            var found = await Context.Users.FirstAsync(u => u.Email == user.Email);
+            var found = await Context.Users.FindAsync(userId);
 
             if (found == null)
             {
                 return false;
             }
 
-            var validToken = await authManager.GetAccessToken(accessToken);
-
-            if (found.Id == validToken.UserId)
+            if (found.Id == userId)
             {
                 found.FirstName = user.FirstName;
                 found.LastName = user.LastName;

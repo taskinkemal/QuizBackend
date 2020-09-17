@@ -1,7 +1,9 @@
 ﻿using System.Net.Mail;
+using System.Runtime.CompilerServices;
 using Common.Interfaces;
 using Microsoft.Extensions.Options;
 
+[assembly: InternalsVisibleTo("Common.Test")]
 namespace Common.Implementations
 {
     /// <summary>
@@ -9,7 +11,9 @@ namespace Common.Implementations
     /// </summary>
     public class EmailManager : IEmailManager
     {
-        private readonly EmailSettings settings;
+        private readonly string from;
+        private readonly SmtpClient smtpClient;
+        internal const int Port = 25;
 
         /// <summary>
         /// 
@@ -17,7 +21,9 @@ namespace Common.Implementations
         /// <param name="settings"></param>
         public EmailManager(IOptions<AppSettings> settings)
         {
-            this.settings = settings.Value.Email;
+            var emailSettings = settings.Value.Email;
+            smtpClient = CreateSmtpClient(emailSettings.Host, emailSettings.User, emailSettings.Password);
+            this.from = emailSettings.From;
         }
 
         /// <summary>
@@ -28,16 +34,32 @@ namespace Common.Implementations
         /// <param name="body"></param>
         public void Send(string email, string subject, string body)
         {
-            var message = new MailMessage();
-            var smtpClient = new SmtpClient(settings.Host, 25);
-            message.From = new MailAddress(settings.From);
-            message.To.Add(new MailAddress(email));
-            message.Subject = subject;
-            message.IsBodyHtml = true; //to make message body as html  
-            message.Body = body;
-            smtpClient.Credentials = new System.Net.NetworkCredential(settings.User, settings.Password);
-            smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            var message = CreateMailMessage(from, email, subject, body);
             smtpClient.Send(message);
+        }
+
+        internal static MailMessage CreateMailMessage(string from, string email, string subject, string body)
+        {
+            var message = new MailMessage
+            {
+                From = new MailAddress(from),
+                Subject = subject,
+                IsBodyHtml = true,
+                Body = body
+            };
+
+            message.To.Add(new MailAddress(email));
+
+            return message;
+        }
+
+        internal static SmtpClient CreateSmtpClient(string host, string user, string password)
+        {
+            return new SmtpClient(host, Port)
+            {
+                Credentials = new System.Net.NetworkCredential(user, password),
+                DeliveryMethod = SmtpDeliveryMethod.Network
+            };
         }
     }
 }

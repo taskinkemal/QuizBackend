@@ -7,9 +7,16 @@ namespace Common
     /// <summary>
     /// 
     /// </summary>
-    public static class AuthenticationHelper
+    public sealed class AuthenticationHelper
     {
         private const string Alphabet = "abcdefghijklmnoqprsqtuwxyz0123456789.";
+
+        private static Random random;
+
+        static AuthenticationHelper()
+        {
+            random = new Random(DateTime.Now.Millisecond);
+        }
 
         /// <summary>
         /// 
@@ -45,10 +52,9 @@ namespace Common
         /// <returns></returns>
         public static string GenerateRandomString(int length)
         {
-            var rand = new Random(DateTime.Now.Millisecond);
             var sb = new StringBuilder();
             for (var i = 0; i < length; i++)
-                sb.Append(Alphabet[rand.Next(Alphabet.Length)]);
+                sb.Append(Alphabet[random.Next(Alphabet.Length)]);
 
             return sb.ToString();
         }
