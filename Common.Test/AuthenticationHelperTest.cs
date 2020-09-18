@@ -15,19 +15,7 @@ namespace Common.Test
             var hash1 = AuthenticationHelper.EncryptPassword(password);
             var hash2 = AuthenticationHelper.EncryptPassword(password);
 
-            Assert.AreEqual(hash1.Length, hash2.Length);
-
-            var isSame = true;
-
-            for (var i = 0; i < hash1.Length; i++)
-            {
-                isSame = hash1[i] == hash2[i];
-
-                if (!isSame)
-                {
-                    break;
-                }
-            }
+            var isSame = AuthenticationHelper.CompareByteArrays(hash1, hash2);
 
             Assert.IsTrue(isSame);
         }

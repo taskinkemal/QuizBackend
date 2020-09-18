@@ -58,5 +58,33 @@ namespace Common
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arr1"></param>
+        /// <param name="arr2"></param>
+        /// <returns></returns>
+        public static bool CompareByteArrays(byte[] arr1, byte[] arr2)
+        {
+            if (arr1 == null || arr2 == null || arr1.Length != arr2.Length)
+            {
+                return false;
+            }
+
+            var isSame = true;
+
+            for (var i = 0; i < arr1.Length; i++)
+            {
+                isSame = arr1[i] == arr2[i];
+
+                if (!isSame)
+                {
+                    break;
+                }
+            }
+
+            return isSame;
+        }
     }
 }

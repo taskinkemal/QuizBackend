@@ -52,9 +52,9 @@ namespace BusinessLayer.Implementations
         {
             var passwordHash = AuthenticationHelper.EncryptPassword(request.Password);
 
-            var user = await Context.Users.FirstAsync(u => u.Email == request.Email && u.PasswordHash == passwordHash);
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user != null)
+            if (user != null && AuthenticationHelper.CompareByteArrays(user.PasswordHash, passwordHash))
             {
                 var token = await GenerateTokenAsync(user.Id, request.DeviceId);
 
@@ -77,6 +77,11 @@ namespace BusinessLayer.Implementations
             var existingToken = await Context.UserTokens.FindAsync(userId, deviceId);
             var user = await Context.Users.FindAsync(userId);
 
+            if (user == null)
+            {
+                return null;
+            }
+
             if (existingToken != null)
             {
                 existingToken.ValidUntil = DateTime.Now.AddYears(1);
@@ -95,13 +100,6 @@ namespace BusinessLayer.Implementations
             else
             {
                 var token = AuthenticationHelper.GenerateToken(userId);
-                var newToken = new AuthToken
-                {
-                    UserId = user.Id,
-                    IsVerified = user.IsVerified,
-                    Token = token,
-                    ValidUntil = DateTime.Now.AddYears(1)
-                };
 
                 await Context.UserTokens.AddAsync(new UserToken
                 {
@@ -113,7 +111,13 @@ namespace BusinessLayer.Implementations
 
                 await Context.SaveChangesAsync();
 
-                result = newToken;
+                result = new AuthToken
+                {
+                    UserId = user.Id,
+                    IsVerified = user.IsVerified,
+                    Token = token,
+                    ValidUntil = DateTime.Now.AddYears(1)
+                };
             }
 
             return result;

@@ -1,21 +1,24 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "WebApplication\WebApplication.csproj", "{4D050812-E340-433E-BE36-9822A8C076C4}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication", "WebApplication\WebApplication.csproj", "{4D050812-E340-433E-BE36-9822A8C076C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCommon", "WebCommon\WebCommon.csproj", "{49B66D24-4822-4C39-B80C-916D27F53A97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebCommon", "WebCommon\WebCommon.csproj", "{49B66D24-4822-4C39-B80C-916D27F53A97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{37CF3FF1-7C54-47F4-AE4E-CA8FB7126E66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{37CF3FF1-7C54-47F4-AE4E-CA8FB7126E66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{F98EEA36-1EF3-40F8-B516-6B92E0D2F55D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{F98EEA36-1EF3-40F8-B516-6B92E0D2F55D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{5DCECA3E-A579-48CC-A4F0-3D02CDC1D6CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{5DCECA3E-A579-48CC-A4F0-3D02CDC1D6CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{A07BC1E1-8A30-4247-87AF-0DC989908228}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Test", "Common.Test\Common.Test.csproj", "{9507774E-E956-49EC-A3A2-8DF8ADB7FD82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Test", "Common.Test\Common.Test.csproj", "{9507774E-E956-49EC-A3A2-8DF8ADB7FD82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models.Test", "Models.Test\Models.Test.csproj", "{671B89C8-B5B5-4C12-94DE-933C9A1FFC05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models.Test", "Models.Test\Models.Test.csproj", "{671B89C8-B5B5-4C12-94DE-933C9A1FFC05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer.Test", "BusinessLayer.Test\BusinessLayer.Test.csproj", "{C475B77E-47A6-4018-8EC7-3AFFDDE214D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +54,20 @@ Global
 		{671B89C8-B5B5-4C12-94DE-933C9A1FFC05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{671B89C8-B5B5-4C12-94DE-933C9A1FFC05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{671B89C8-B5B5-4C12-94DE-933C9A1FFC05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C475B77E-47A6-4018-8EC7-3AFFDDE214D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C475B77E-47A6-4018-8EC7-3AFFDDE214D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C475B77E-47A6-4018-8EC7-3AFFDDE214D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C475B77E-47A6-4018-8EC7-3AFFDDE214D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9507774E-E956-49EC-A3A2-8DF8ADB7FD82} = {A07BC1E1-8A30-4247-87AF-0DC989908228}
 		{671B89C8-B5B5-4C12-94DE-933C9A1FFC05} = {A07BC1E1-8A30-4247-87AF-0DC989908228}
+		{C475B77E-47A6-4018-8EC7-3AFFDDE214D5} = {A07BC1E1-8A30-4247-87AF-0DC989908228}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D57A70B-9271-4587-96AA-994F356585BD}
 	EndGlobalSection
 EndGlobal

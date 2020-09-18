@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Models.DbModels
+﻿namespace Models.DbModels
 {
     public enum QuestionType
     {
