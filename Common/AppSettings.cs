@@ -15,6 +15,9 @@
         /// </summary>
         public string ApiKey { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public EmailSettings Email { get; set; }
     }
 }

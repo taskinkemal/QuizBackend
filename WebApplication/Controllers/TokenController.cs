@@ -31,6 +31,7 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
+        /// <response code="401">Credentials are not verified.</response>
         [HttpPost]
         [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]

@@ -32,6 +32,8 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
+        /// <response code="406">Password Criteria Not Satisfied</response>
+        /// <response code="409">Email Exists</response>
         [HttpPut]
         [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Conflict)]
@@ -58,6 +60,7 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
+        /// <response code="401">Not authorized.</response>
         [HttpPost]
         [Authenticate]
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]

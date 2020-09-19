@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
+using BusinessLayer.Interfaces;
 using Common;
 using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,12 @@ namespace BusinessLayer.Test
             return new AuthManager(context, Mock.Of<ILogManager>());
         }
 
-        internal static async Task<User> AddUserAsync(QuizContext context, int testId, string email = "", string password = "")
+        internal static UserManager GetUserManager(QuizContext context, IAuthManager authManager)
+        {
+            return new UserManager(context, authManager, Mock.Of<ILogManager>(), Mock.Of<IEmailManager>());
+        }
+
+        internal static async Task<User> AddUserAsync(QuizContext context, int testId, string email = "", string password = "", bool isVerified = true)
         {
             var user = await context.Users.AddAsync(new User
             {
@@ -32,7 +38,7 @@ namespace BusinessLayer.Test
                 LastName = "Surname" + testId,
                 PasswordHash = AuthenticationHelper.EncryptPassword(!string.IsNullOrWhiteSpace(password) ? password : "otherpassword123_" + testId),
                 PictureUrl = "",
-                IsVerified = true
+                IsVerified = isVerified
             });
 
             return user.Entity;
@@ -49,6 +55,19 @@ namespace BusinessLayer.Test
             });
 
             return userToken.Entity;
+        }
+
+        internal static async Task<OneTimeToken> AddOneTimeTokenAsync(QuizContext context, string email, OneTimeTokenType tokenType, string token, bool isValid)
+        {
+            var oneTimeToken = await context.OneTimeTokens.AddAsync(new OneTimeToken
+            {
+                Email = email,
+                TokenType = (byte)tokenType,
+                Token = token,
+                ValidUntil = DateTime.Now.AddYears(isValid ? 1 : -1)
+            });
+
+            return oneTimeToken.Entity;
         }
     }
 }

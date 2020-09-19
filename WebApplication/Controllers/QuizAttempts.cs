@@ -6,10 +6,17 @@ using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class QuizAttemptsController : AuthController
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IEnumerable<QuizAttempt> Get()
         {
@@ -31,6 +38,11 @@ namespace WebApplication.Controllers
             return list;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost]
         public ActionResult<bool> Post(int id)
         {

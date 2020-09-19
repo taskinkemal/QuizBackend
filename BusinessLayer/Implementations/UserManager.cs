@@ -37,7 +37,12 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email)
         {
-            var user = await Context.Users.FirstAsync(u => u.Email == email && !u.IsVerified);
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsVerified);
+
+            if (user == null)
+            {
+                return false;
+            }
 
             var token = AuthenticationHelper.GenerateRandomString(160);
 
@@ -82,7 +87,12 @@ namespace BusinessLayer.Implementations
                     t.TokenType == (byte)OneTimeTokenType.ForgotPassword &&
                     t.ValidUntil > DateTime.Now);
 
-                var user = await Context.Users.FirstAsync(u => u.Email == token.Email && !u.IsVerified);
+                if (token == null)
+                {
+                    return false;
+                }
+
+                var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == token.Email && !u.IsVerified);
 
                 if (user != null)
                 {
@@ -107,6 +117,12 @@ namespace BusinessLayer.Implementations
         public async System.Threading.Tasks.Task<bool> DeleteUserAsync(int userId)
         {
             var user = await Context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
             Context.Users.Remove(user);
 
             await Context.SaveChangesAsync();
@@ -121,7 +137,7 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async System.Threading.Tasks.Task<GenericManagerResponse<AuthToken, InsertUserResponse>> InsertUserAsync(Models.TransferObjects.User user)
         {
-            var found = await Context.Users.FirstAsync(u => u.Email == user.Email);
+            var found = await Context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
 
             if (found == null)
             {
@@ -178,7 +194,12 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email)
         {
-            var user = await Context.Users.FirstAsync(u => u.Email == email && !u.IsVerified);
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsVerified);
+
+            if (user == null)
+            {
+                return false;
+            }
 
             var token = AuthenticationHelper.GenerateRandomString(160);
 
@@ -192,14 +213,9 @@ namespace BusinessLayer.Implementations
 
             await Context.SaveChangesAsync();
 
-            if (user != null)
-            {
-                emailManager.Send(email, "Verify your account", "Here is your token: " + token);
+            emailManager.Send(email, "Verify your account", "Here is your token: " + token);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         /// <summary>
@@ -211,9 +227,20 @@ namespace BusinessLayer.Implementations
         {
             var oneTimeToken = await Context.OneTimeTokens.FirstOrDefaultAsync(t =>
                 t.Token == request.Token &&
+                t.TokenType == (byte)OneTimeTokenType.AccountVerification &&
                 t.ValidUntil > DateTime.Now);
 
-            var user = await Context.Users.FirstAsync(u => u.Email == oneTimeToken.Email && !u.IsVerified);
+            if (oneTimeToken == null)
+            {
+                return null;
+            }
+
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == oneTimeToken.Email && !u.IsVerified);
+
+            if (user == null)
+            {
+                return null;
+            }
 
             var token = await authManager.GenerateTokenAsync(user.Id, request.DeviceId);
 
@@ -236,6 +263,11 @@ namespace BusinessLayer.Implementations
             }
 
             var user = await Context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
 
             user.PasswordHash = AuthenticationHelper.EncryptPassword(password);
 

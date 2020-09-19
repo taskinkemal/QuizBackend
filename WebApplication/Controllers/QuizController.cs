@@ -12,6 +12,10 @@ namespace WebApplication.Controllers
     [Route("[controller]")]
     public class QuizController : AuthController
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IEnumerable<Quiz> Get()
         {

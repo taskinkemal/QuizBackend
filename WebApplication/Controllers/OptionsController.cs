@@ -5,10 +5,18 @@ using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class OptionsController : AuthController
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("Quiz/{id}")]
         public IEnumerable<Option> Get(int id)
