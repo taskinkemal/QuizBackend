@@ -39,7 +39,7 @@ namespace WebApplication.Controllers
         {
             var token = await authManager.GenerateTokenAsync(data);
 
-            return token != null ? CreateResponse(token) : CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+            return token != null ? ControllerHelper.CreateResponse(token) : ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
     }
 }

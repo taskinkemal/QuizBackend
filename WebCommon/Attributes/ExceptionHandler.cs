@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Options;
 using System;
 using System.Net;
 using Common;
 using Common.Interfaces;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("WebCommon.Test")]
 namespace WebCommon.Attributes
 {
     /// <summary>
@@ -14,17 +15,14 @@ namespace WebCommon.Attributes
     /// </summary>
     public class ExceptionHandlerAttribute : ExceptionFilterAttribute
     {
-        private readonly IOptions<AppSettings> settings;
         private readonly ILogManager logManager;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="settings"></param>
         /// <param name="logManager"></param>
-        public ExceptionHandlerAttribute(IOptions<AppSettings> settings, ILogManager logManager)
+        public ExceptionHandlerAttribute(ILogManager logManager)
         {
-            this.settings = settings;
             this.logManager = logManager;
         }
 
@@ -35,12 +33,22 @@ namespace WebCommon.Attributes
         /// <returns></returns>
         public override Task OnExceptionAsync(ExceptionContext context)
         {
-            logManager.AddLog(context.Exception);
+            var result = ProcessException(context.Exception);
+
+            context.HttpContext.Response.StatusCode = (int)result.status;
+            context.Result = new JsonResult(new HttpErrorMessage(result.code));
+
+            return base.OnExceptionAsync(context);
+        }
+
+        internal (HttpStatusCode status, string code) ProcessException(Exception exception)
+        {
+            logManager.AddLog(exception);
 
             HttpStatusCode status;
             string code;
 
-            if (context.Exception is NotImplementedException)
+            if (exception is NotImplementedException)
             {
                 status = HttpStatusCode.NotImplemented;
                 code = "MethodNotImplemented";
@@ -51,10 +59,7 @@ namespace WebCommon.Attributes
                 code = "SystemError";
             }
 
-            context.HttpContext.Response.StatusCode = (int)status;
-            context.Result = new JsonResult(new HttpErrorMessage(code));
-
-            return base.OnExceptionAsync(context);
+            return (status, code);
         }
     }
 }

@@ -45,13 +45,13 @@ namespace WebApplication.Controllers
             switch (result.Response)
             {
                 case InsertUserResponse.Success:
-                    return CreateResponse(result.Value);
+                    return ControllerHelper.CreateResponse(result.Value);
                 case InsertUserResponse.EmailExists:
-                    return CreateErrorResponse(HttpStatusCode.Conflict, "EmailExists");
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "EmailExists");
                 case InsertUserResponse.PasswordCriteriaNotSatisfied:
-                    return CreateErrorResponse(HttpStatusCode.NotAcceptable, "PasswordCriteriaNotSatisfied");
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "PasswordCriteriaNotSatisfied");
                 default:
-                    return CreateErrorResponse(HttpStatusCode.InternalServerError, "SystemError");
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "SystemError");
             }
         }
 
@@ -68,7 +68,7 @@ namespace WebApplication.Controllers
         public async Task<JsonResult> Post([FromBody] User user)
         {
             var result = await userManager.UpdateUserAsync(Token.UserId, user);
-            return result ? CreateResponse(true) : CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+            return result ? ControllerHelper.CreateResponse(true) : ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
 
         /// <summary>

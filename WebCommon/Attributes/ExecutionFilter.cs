@@ -6,11 +6,13 @@ using System.Net;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Common;
-using WebCommon.BaseControllers;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using WebCommon.Interfaces;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("WebCommon.Test")]
 namespace WebCommon.Attributes
 {
     /// <summary>
@@ -38,10 +40,10 @@ namespace WebCommon.Attributes
         /// <param name="context"></param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            RetrieveParameters(context, out var accessToken);
+            RetrieveParameters(context.HttpContext.Request.Headers, out var accessToken);
             SetCulture();
 
-            var result = ValidateRequest(context, accessToken).Result;
+            var result = ValidateRequest(context.Controller as IBaseController, accessToken).Result;
 
             if (result.isValid || !(authenticationRequired || HasAuthenticateAttribute(context)))
             {
@@ -56,20 +58,20 @@ namespace WebCommon.Attributes
             }
         }
 
-        private async Task<(bool isValid, string errPhrase)> ValidateRequest(ActionExecutingContext context, string accessToken)
+        internal async Task<(bool isValid, string errPhrase)> ValidateRequest(IBaseController controller, string accessToken)
         {
             string errPhrase;
 
             if (accessToken != null)
             {
-                if (context.Controller is BaseController apiController)
+                if (controller != null)
                 {
                     var userToken = await authManager.VerifyAccessToken(accessToken);
                     if (userToken != null)
                     {
                         if (userToken.IsVerified)
                         {
-                            apiController.Token = userToken;
+                            controller.Token = userToken;
                         }
                         else
                         {
@@ -98,9 +100,9 @@ namespace WebCommon.Attributes
             return (true, "");
         }
 
-        private static void RetrieveParameters(ActionContext context, out string accessToken)
+        internal static void RetrieveParameters(IHeaderDictionary headers, out string accessToken)
         {
-            accessToken = GetHeader(context.HttpContext.Request.Headers, "Authorization", "");
+            accessToken = GetHeader(headers, "Authorization", "");
             if (!string.IsNullOrWhiteSpace(accessToken) && accessToken.StartsWith("Bearer ", StringComparison.InvariantCulture))
             {
                 accessToken = accessToken.Substring("Bearer ".Length);
