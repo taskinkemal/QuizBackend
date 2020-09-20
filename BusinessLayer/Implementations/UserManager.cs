@@ -69,18 +69,12 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="oneTimeToken"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string oneTimeToken, string password)
+        public async System.Threading.Tasks.Task<bool> UpdatePassword(string oneTimeToken, string password)
         {
-            if (userId > 0)
-            {
-                var result = await UpdatePassword(userId, password);
-                return result;
-            }
-            else if (!string.IsNullOrWhiteSpace(oneTimeToken))
+            if (!string.IsNullOrWhiteSpace(oneTimeToken))
             {
                 var token = await Context.OneTimeTokens.FirstOrDefaultAsync(t =>
                     t.Token == oneTimeToken &&
@@ -107,6 +101,35 @@ namespace BusinessLayer.Implementations
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string password)
+        {
+            if (!PasswordCriteria.IsValid(password))
+            {
+                return false;
+            }
+
+            var user = await Context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.PasswordHash = AuthenticationHelper.EncryptPassword(password);
+
+            Context.Users.Update(user);
+
+            await Context.SaveChangesAsync();
+
+            return true;
         }
 
         /// <summary>
@@ -253,29 +276,6 @@ namespace BusinessLayer.Implementations
             await Context.SaveChangesAsync();
 
             return token;
-        }
-
-        private async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string password)
-        {
-            if (!PasswordCriteria.IsValid(password))
-            {
-                return false;
-            }
-
-            var user = await Context.Users.FindAsync(userId);
-
-            if (user == null)
-            {
-                return false;
-            }
-
-            user.PasswordHash = AuthenticationHelper.EncryptPassword(password);
-
-            Context.Users.Update(user);
-
-            await Context.SaveChangesAsync();
-
-            return true;
         }
 
         private async System.Threading.Tasks.Task<int> InsertUserInternalAsync(Models.TransferObjects.User user)

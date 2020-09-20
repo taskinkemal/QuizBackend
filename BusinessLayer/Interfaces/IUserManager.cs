@@ -18,11 +18,18 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="oneTimeToken"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string oneTimeToken, string password);
+        System.Threading.Tasks.Task<bool> UpdatePassword(string oneTimeToken, string password);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string password);
 
         /// <summary>
         /// 

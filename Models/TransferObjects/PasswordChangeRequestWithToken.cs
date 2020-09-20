@@ -3,16 +3,11 @@
     /// <summary>
     /// 
     /// </summary>
-    public class PasswordChangeRequest
+    public class PasswordChangeRequestWithToken : OneTimeTokenRequest
     {
         /// <summary>
         /// 
         /// </summary>
         public string Password { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string DeviceId { get; set; }
     }
 }

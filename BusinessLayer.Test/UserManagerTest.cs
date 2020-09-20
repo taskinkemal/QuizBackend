@@ -112,7 +112,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(user.Id, "", newPassword);
+                result = await sut.UpdatePassword(user.Id, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
             }
@@ -140,7 +140,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(user.Id, "", newPassword);
+                result = await sut.UpdatePassword(user.Id, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
             }
@@ -166,7 +166,7 @@ namespace BusinessLayer.Test
                 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(user.Id+1, "", newPassword);
+                result = await sut.UpdatePassword(user.Id+1, newPassword);
             }
 
             Assert.IsFalse(result);
@@ -194,7 +194,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(0, tokenString, newPassword);
+                result = await sut.UpdatePassword(tokenString, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
                 deletedToken = await context.OneTimeTokens.FirstOrDefaultAsync(t => t.Email == email && t.Token == tokenString);
@@ -226,7 +226,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(0, tokenString, newPassword);
+                result = await sut.UpdatePassword(tokenString, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
             }
@@ -256,7 +256,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(0, tokenString, newPassword);
+                result = await sut.UpdatePassword(tokenString, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
             }
@@ -283,7 +283,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(0, tokenString, newPassword);
+                result = await sut.UpdatePassword(tokenString, newPassword);
             }
 
             Assert.IsFalse(result);
@@ -310,7 +310,7 @@ namespace BusinessLayer.Test
 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(0, tokenString, newPassword);
+                result = await sut.UpdatePassword(tokenString, newPassword);
 
                 updatedUser = await context.Users.FindAsync(user.Id);
             }

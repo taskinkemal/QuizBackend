@@ -60,7 +60,21 @@ namespace WebApplication.Controllers
         }
 
         /// <summary>
-        /// Update user password. Either the access token or the one time token must be present. Access token has priority over the one time token.
+        /// Update user password with the one time token.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("WithToken")]
+        public async Task<bool> PostWithToken([FromBody] PasswordChangeRequestWithToken data)
+        {
+            var result = await userManager.UpdatePassword(data.Token, data.Password);
+            return result;
+        }
+
+
+        /// <summary>
+        /// Update user password with the authentication token.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -68,7 +82,7 @@ namespace WebApplication.Controllers
         [HttpPost]
         public async Task<bool> Post([FromBody] PasswordChangeRequest data)
         {
-            var result = await userManager.UpdatePassword(Token.UserId, data.Token, data.Password);
+            var result = await userManager.UpdatePassword(Token.UserId, data.Password);
             return result;
         }
     }
