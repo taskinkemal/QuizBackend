@@ -3,7 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
-    public interface IEmailManager
+    public interface IEmailManager : IDependency
     {
         /// <summary>
         /// 

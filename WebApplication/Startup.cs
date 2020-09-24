@@ -6,20 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Common;
-using Common.Interfaces;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using BusinessLayer.Interfaces;
-using BusinessLayer.Implementations;
 using BusinessLayer.Context;
-using Common.Implementations;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
+using WebCommon;
 
 namespace WebApplication
 {
@@ -51,7 +45,7 @@ namespace WebApplication
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            StartupHelper.ConfigureAppSettings(services, Configuration);
 
             services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
             {
@@ -73,41 +67,18 @@ namespace WebApplication
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            services.Configure<IISServerOptions>(options =>
-            {
-                // The Newtonsoft.json is not working without allowing synchronous IO.
-                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
-                // https://github.com/dotnet/aspnetcore/issues/8302
-                options.AllowSynchronousIO = true;
-            });
-
-            services.Configure<KestrelServerOptions>(options =>
-            {
-                // The Newtonsoft.json is not working without allowing synchronous IO.
-                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
-                // https://github.com/dotnet/aspnetcore/issues/8302
-                options.AllowSynchronousIO = true;
-            });
+            ConfigureIIS(services);
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
-                SetNewtonsoftSerializerSettings(options.SerializerSettings);
+                StartupHelper.SetNewtonsoftSerializerSettings(options.SerializerSettings);
             });
 
-            InjectDependencies(services);
+            StartupHelper.InjectDependencies(services);
 
             ConfigureServiceSwagger(services);
 
             Environment.SetEnvironmentVariable("BASEDIR", PlatformServices.Default.Application.ApplicationBasePath);
-        }
-
-        private static void InjectDependencies(IServiceCollection services)
-        {
-            services.AddSingleton<ILogManager, LogManager>();
-            services.AddSingleton<IEmailManager, EmailManager>();
-
-            services.AddScoped<IAuthManager, AuthManager>();
-            services.AddScoped<IUserManager, UserManager>();
         }
 
         /// <summary>
@@ -137,6 +108,30 @@ namespace WebApplication
                     "api/{controller}/{id?}");
             });
 
+            ConfigureAppSwagger(app);
+        }
+
+        private static void ConfigureIIS(IServiceCollection services)
+        {
+            services.Configure<IISServerOptions>(options =>
+            {
+                // The Newtonsoft.json is not working without allowing synchronous IO.
+                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
+                // https://github.com/dotnet/aspnetcore/issues/8302
+                options.AllowSynchronousIO = true;
+            });
+
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                // The Newtonsoft.json is not working without allowing synchronous IO.
+                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
+                // https://github.com/dotnet/aspnetcore/issues/8302
+                options.AllowSynchronousIO = true;
+            });
+        }
+
+        private static void ConfigureAppSwagger(IApplicationBuilder app)
+        {
             app.UseSwagger(c =>
             {
                 c.PreSerializeFilters.Add((swagger, httpReq) => {
@@ -149,15 +144,6 @@ namespace WebApplication
                 c.SwaggerEndpoint("v1/swagger.json", "V1 Docs");
                 c.DocumentTitle = "Quiz API";
             });
-        }
-
-        private static void SetNewtonsoftSerializerSettings(JsonSerializerSettings serializerSettings)
-        {
-            serializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-            serializerSettings.DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss";
-            serializerSettings.ContractResolver = new DefaultContractResolver();
-            serializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-            serializerSettings.NullValueHandling = NullValueHandling.Ignore;
         }
 
         private static void ConfigureServiceSwagger(IServiceCollection services)
@@ -184,14 +170,18 @@ namespace WebApplication
                         Description = "Quiz Web API Documentation"
                     });
 
-                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "WebApplication.xml"));
-                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "BusinessLayer.xml"));
-                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Common.xml"));
-                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Models.xml"));
-                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "WebCommon.xml"));
+                AddXmlComments(options, "WebApplication", "BusinessLayer", "Common", "Models", "WebCommon");
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
+        }
+
+        private static void AddXmlComments(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions options, params string[] projectNames)
+        {
+            foreach (var projectName in projectNames)
+            {
+                options.IncludeXmlComments(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, projectName + ".xml"));
+            }
         }
     }
 }
