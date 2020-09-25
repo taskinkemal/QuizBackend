@@ -32,7 +32,17 @@ namespace BusinessLayer.Implementations
         {
             var token = await GetAccessToken(accessToken);
 
+            if (token == null)
+            {
+                return null;
+            }
+
             var user = await Context.Users.FindAsync(token.UserId);
+
+            if (user == null)
+            {
+                return null;
+            }
 
             return new AuthToken
             {

@@ -11,16 +11,18 @@ namespace Common.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="logMessage"></param>
+        /// <param name="category"></param>
+        /// <param name="messageTemplate"></param>
         /// <param name="level"></param>
-        void AddLog(string logMessage, LogEventLevel level = LogEventLevel.Information);
+        /// <param name="logArguments"></param>
+        void AddLog(LogCategory category, string messageTemplate, LogEventLevel level, params object[] logArguments);
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="category"></param>
         /// <param name="exc"></param>
-        /// <param name="messageTemplate"></param>
-        /// <param name="level"></param>
-        void AddLog(Exception exc, string messageTemplate = "", LogEventLevel level = LogEventLevel.Error);
+        /// <param name="logArguments"></param>
+        void AddLog(LogCategory category, Exception exc, params object[] logArguments);
     }
 }

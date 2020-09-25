@@ -2,11 +2,13 @@
 using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common;
+using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.DbModels;
 using Models.TransferObjects;
 using Moq;
+using Serilog.Events;
 
 namespace BusinessLayer.Test
 {
@@ -20,10 +22,19 @@ namespace BusinessLayer.Test
             const string email = "user1@mymail.com";
             bool result;
             OneTimeToken token;
+            var isLogManagerCalled = false;
+
+            var logManager = new Mock<ILogManager>();
+
+            logManager.Setup(c => c.AddLog(LogCategory.Email, It.IsAny<string>(), LogEventLevel.Information, It.IsAny<object[]>()))
+                .Callback(() =>
+                {
+                    isLogManagerCalled = true;
+                });
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
-                var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
+                var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager.Object);
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
                 await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
@@ -38,6 +49,7 @@ namespace BusinessLayer.Test
 
             Assert.IsTrue(result);
             Assert.IsNotNull(token);
+            Assert.IsTrue(isLogManagerCalled);
         }
 
         [TestMethod]
@@ -155,7 +167,6 @@ namespace BusinessLayer.Test
             bool result;
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
-            const string newPassword = "a";
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
@@ -166,7 +177,7 @@ namespace BusinessLayer.Test
                 
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdatePassword(user.Id+1, newPassword);
+                result = await sut.UpdatePassword(user.Id+1, password);
             }
 
             Assert.IsFalse(result);
@@ -190,7 +201,7 @@ namespace BusinessLayer.Test
                 await ManagerTestHelper.AddUserAsync(context, 0);
                 var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
-                var token = await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
 
                 await context.SaveChangesAsync();
 
@@ -222,7 +233,7 @@ namespace BusinessLayer.Test
                 await ManagerTestHelper.AddUserAsync(context, 0);
                 var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
-                var token = await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, false);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, false);
 
                 await context.SaveChangesAsync();
 
@@ -252,7 +263,7 @@ namespace BusinessLayer.Test
                 await ManagerTestHelper.AddUserAsync(context, 0);
                 var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, true);
                 await ManagerTestHelper.AddUserAsync(context, 2);
-                var token = await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
 
                 await context.SaveChangesAsync();
 
@@ -278,8 +289,8 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1);
-                var token = await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
+                await ManagerTestHelper.AddUserAsync(context, 1);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
 
                 await context.SaveChangesAsync();
 
@@ -306,7 +317,7 @@ namespace BusinessLayer.Test
                 await ManagerTestHelper.AddUserAsync(context, 0);
                 var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
-                var token = await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, true);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, true);
 
                 await context.SaveChangesAsync();
 
@@ -380,7 +391,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
 
                 await context.SaveChangesAsync();
@@ -412,7 +423,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
 
                 await context.SaveChangesAsync();
@@ -444,7 +455,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
 
                 await context.SaveChangesAsync();
@@ -552,7 +563,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
 
                 await context.SaveChangesAsync();
@@ -579,7 +590,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, true);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, true);
                 await ManagerTestHelper.AddUserAsync(context, 2);
 
                 await context.SaveChangesAsync();
@@ -607,7 +618,7 @@ namespace BusinessLayer.Test
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
 
                 await context.SaveChangesAsync();
 
@@ -671,14 +682,13 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string tokenString = "token";
-            Models.DbModels.User user;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, "differentToken", true);
 
@@ -701,14 +711,13 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string tokenString = "token";
-            Models.DbModels.User user;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, false);
 
@@ -731,14 +740,13 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string tokenString = "token";
-            Models.DbModels.User user;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
                 await ManagerTestHelper.AddUserAsync(context, 2);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, "differentEmail@mymail.com", OneTimeTokenType.AccountVerification, tokenString, false);
 
@@ -761,16 +769,15 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string tokenString = "token";
-            Models.DbModels.User user;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
                 await ManagerTestHelper.AddUserAsync(context, 0);
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                await ManagerTestHelper.AddUserAsync(context, 1, email, password);
                 await ManagerTestHelper.AddUserAsync(context, 2);
-                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, false);
+                await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, true);
 
                 await context.SaveChangesAsync();
 

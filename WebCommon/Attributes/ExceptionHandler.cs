@@ -43,7 +43,7 @@ namespace WebCommon.Attributes
 
         internal (HttpStatusCode status, string code) ProcessException(Exception exception)
         {
-            logManager.AddLog(exception);
+            logManager.AddLog(LogCategory.GeneralError, exception);
 
             HttpStatusCode status;
             string code;

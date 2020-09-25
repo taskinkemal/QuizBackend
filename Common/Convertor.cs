@@ -5,7 +5,7 @@ namespace Common
     /// <summary>
     /// 
     /// </summary>
-    public sealed class Convertor
+    public static class Convertor
     {
         /// <summary>
         /// 

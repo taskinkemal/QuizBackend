@@ -4,6 +4,7 @@ using WebCommon.BaseControllers;
 using WebCommon.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Models.TransferObjects;
 
 namespace WebCommon.Test
 {
@@ -32,6 +33,25 @@ namespace WebCommon.Test
             var attribute = GetTypeFilterAttribute<ExceptionHandlerAttribute>(typeof(BaseController));
 
             Assert.IsNotNull(attribute);
+        }
+
+        [TestMethod]
+        public void BaseControllerConstructorTokenIsNull()
+        {
+            var sut = new BaseController();
+            
+            Assert.IsNull(sut.Token);
+        }
+
+        [TestMethod]
+        public void BaseControllerConstructorTokenIsSet()
+        {
+            var sut = new BaseController();
+            var token = new AuthToken();
+
+            sut.Token = token;
+
+            Assert.AreSame(token, sut.Token);
         }
 
         private TypeFilterAttribute GetTypeFilterAttribute<T>(Type type)

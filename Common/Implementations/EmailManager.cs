@@ -11,7 +11,7 @@ namespace Common.Implementations
     /// </summary>
     public class EmailManager : IEmailManager
     {
-        private readonly string from;
+        internal EmailSettings Settings { get; }
         private readonly SmtpClient smtpClient;
         internal const int Port = 25;
 
@@ -21,9 +21,8 @@ namespace Common.Implementations
         /// <param name="settings"></param>
         public EmailManager(IOptions<AppSettings> settings)
         {
-            var emailSettings = settings.Value.Email;
-            smtpClient = CreateSmtpClient(emailSettings.Host, emailSettings.User, emailSettings.Password);
-            this.from = emailSettings.From;
+            Settings = settings.Value.Email;
+            smtpClient = CreateSmtpClient(Settings.Host, Settings.User, Settings.Password);
         }
 
         /// <summary>
@@ -34,7 +33,7 @@ namespace Common.Implementations
         /// <param name="body"></param>
         public void Send(string email, string subject, string body)
         {
-            var message = CreateMailMessage(from, email, subject, body);
+            var message = CreateMailMessage(Settings.From, email, subject, body);
             smtpClient.Send(message);
         }
 

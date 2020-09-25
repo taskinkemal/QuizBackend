@@ -1,13 +1,42 @@
 ﻿using System.Linq;
 using System.Net.Mail;
 using Common.Implementations;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Common.Test
 {
     [TestClass]
     public class EmailManagerTest
     {
+        [TestMethod]
+        public void ConstructorTest()
+        {
+            const string from = "testfrom";
+            const string host = "testhost";
+            const string user = "testuser";
+            const string password = "testpassword";
+
+            var settings = new AppSettings
+            {
+                Email = new EmailSettings
+                {
+                    From = from,
+                    Host = host,
+                    User = user,
+                    Password = password
+                }
+            };
+
+            var options = new Mock<IOptions<AppSettings>>();
+            options.Setup(c => c.Value).Returns(settings);
+
+            var sut = new EmailManager(options.Object);
+
+            Assert.AreSame(settings.Email, sut.Settings);
+        }
+
         [TestMethod]
         public void SmtpClientHasCorrectProperties()
         {

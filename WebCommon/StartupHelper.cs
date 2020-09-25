@@ -22,6 +22,7 @@ namespace WebCommon
         public static void InjectDependencies(IServiceCollection services)
         {
             services.AddSingleton<ILogManager, LogManager>();
+            services.AddSingleton<ILogAdapter, LogAdapter>();
             services.AddSingleton<IEmailManager, EmailManager>();
 
             services.AddScoped<IAuthManager, AuthManager>();
@@ -38,6 +39,10 @@ namespace WebCommon
             services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serializerSettings"></param>
         public static void SetNewtonsoftSerializerSettings(JsonSerializerSettings serializerSettings)
         {
             serializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;

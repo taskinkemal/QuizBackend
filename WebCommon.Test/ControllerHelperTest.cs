@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.TransferObjects;
@@ -10,12 +11,82 @@ namespace WebCommon.Test
     public class ControllerHelperTest
     {
         [TestMethod]
-        public void CreateResponseSimpleType()
+        public void CreateResponseSimpleTypeBoolean()
         {
             var result = ControllerHelper.CreateResponse(true);
 
             Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<bool>));
             Assert.IsTrue((result.Value as GenericWrapper<bool>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeEnum()
+        {
+            var value = LogCategory.GeneralError;
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<LogCategory>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<LogCategory>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeString()
+        {
+            var value = "teststring";
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<string>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<string>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeDecimal()
+        {
+            var value = 1.2M;
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<decimal>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<decimal>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeDateTime()
+        {
+            var value = new DateTime(2020, 5, 12);
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<DateTime>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<DateTime>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeDateTimeOffset()
+        {
+            var value = new DateTimeOffset(2020, 5, 12, 9, 0, 0, new TimeSpan(1, 0, 0));
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<DateTimeOffset>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<DateTimeOffset>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeDateTimeSpan()
+        {
+            var value = new TimeSpan(1, 0, 0);
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<TimeSpan>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<TimeSpan>).Value);
+        }
+
+        [TestMethod]
+        public void CreateResponseSimpleTypeDateGuid()
+        {
+            var value = Guid.NewGuid();
+            var result = ControllerHelper.CreateResponse(value);
+
+            Assert.IsInstanceOfType(result.Value, typeof(GenericWrapper<Guid>));
+            Assert.AreEqual(value, (result.Value as GenericWrapper<Guid>).Value);
         }
 
         [TestMethod]

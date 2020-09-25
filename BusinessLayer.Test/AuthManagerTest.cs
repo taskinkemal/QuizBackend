@@ -204,6 +204,133 @@ namespace BusinessLayer.Test
             Assert.IsNull(token);
         }
 
+        [TestMethod]
+        public async Task VerifyAccessToken()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            const bool isUserVerified = false;
+            AuthToken token;
+            User user;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, isUserVerified);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString, true);
+
+                await context.SaveChangesAsync();
+
+                token = await sut.VerifyAccessToken(tokenString);
+            }
+
+            Assert.AreEqual(tokenString, token.Token);
+            Assert.AreEqual(user.Id, token.UserId);
+            Assert.AreEqual(isUserVerified, token.IsVerified);
+        }
+
+        [TestMethod]
+        public async Task VerifyAccessTokenUserIsVerified()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            AuthToken token;
+            User user;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString, true);
+
+                await context.SaveChangesAsync();
+
+                token = await sut.VerifyAccessToken(tokenString);
+            }
+
+            Assert.AreEqual(tokenString, token.Token);
+            Assert.AreEqual(user.Id, token.UserId);
+            Assert.IsTrue(token.IsVerified);
+        }
+
+        [TestMethod]
+        public async Task VerifyAccessTokenTokenExpired()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            AuthToken token;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString, false);
+
+                await context.SaveChangesAsync();
+
+                token = await sut.VerifyAccessToken(tokenString);
+            }
+
+            Assert.IsNull(token);
+        }
+
+        [TestMethod]
+        public async Task VerifyAccessTokenUserNotFound()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            AuthToken token;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id + 1, deviceId, tokenString, true);
+
+                await context.SaveChangesAsync();
+
+                token = await sut.VerifyAccessToken(tokenString);
+            }
+
+            Assert.IsNull(token);
+        }
+
+        [TestMethod]
+        public async Task VerifyAccessTokenTokenNotFound()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            AuthToken token;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString + "somesuffix", true);
+
+                await context.SaveChangesAsync();
+
+                token = await sut.VerifyAccessToken(tokenString);
+            }
+
+            Assert.IsNull(token);
+        }
+
         private async Task<UserToken> GetAccessTokenInternal(bool isValid)
         {
             const string password = "mypassword123";

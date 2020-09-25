@@ -1,11 +1,23 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Models.TransferObjects;
 using Moq;
 using WebCommon.Attributes;
+using WebCommon.BaseControllers;
 using WebCommon.Interfaces;
 
 namespace WebCommon.Test
@@ -23,11 +35,11 @@ namespace WebCommon.Test
             var token = GetAuthToken(tokenString, true);
             var authManager = GetAuthManager(token);
 
-            Models.TransferObjects.AuthToken actual = null;
+            AuthToken actual = null;
 
             controller
-                .SetupSet(p => p.Token = It.IsAny<Models.TransferObjects.AuthToken>())
-                .Callback<Models.TransferObjects.AuthToken>(value => actual = value);
+                .SetupSet(p => p.Token = It.IsAny<AuthToken>())
+                .Callback<AuthToken>(value => actual = value);
 
             var sut = new ExecutionFilterAttribute(authManager, true);
 
@@ -59,7 +71,6 @@ namespace WebCommon.Test
         {
             const string tokenString = "sampletoken";
 
-            var token = GetAuthToken(tokenString, false);
             var authManager = GetAuthManager(null);
 
             var sut = new ExecutionFilterAttribute(authManager, true);
@@ -155,6 +166,222 @@ namespace WebCommon.Test
             ExecutionFilterAttribute.RetrieveParameters(headers, out actual);
 
             Assert.IsNull(actual);
+        }
+
+        [TestMethod]
+        public void HasAuthenticateAttributeReturnsTrue()
+        {
+            var descriptor = new ControllerActionDescriptor
+            {
+                MethodInfo = GetMethodInfo<ExecutionFilterTest>(x => x.TestControllerWithAuthenticateAttribute())
+            };
+
+            var result = ExecutionFilterAttribute.HasAuthenticateAttribute(descriptor);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void HasAuthenticateAttributeReturnsFalse()
+        {
+            var descriptor = new ControllerActionDescriptor
+            {
+                MethodInfo = GetMethodInfo<ExecutionFilterTest>(x => x.TestControllerWithoutAuthenticateAttribute())
+            };
+
+            var result = ExecutionFilterAttribute.HasAuthenticateAttribute(descriptor);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void HasAuthenticateAttributeMethodIsNull()
+        {
+            var result = ExecutionFilterAttribute.HasAuthenticateAttribute(new ControllerActionDescriptor());
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void HasAuthenticateAttributeDescriptorIsNull()
+        {
+            var result = ExecutionFilterAttribute.HasAuthenticateAttribute(null);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ProceedWithExecutionReturnsTrueWhenValid()
+        {
+            var result = ExecutionFilterAttribute.ProceedWithExecution(true, true, true);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ProceedWithExecutionReturnsTrueWhenAuthenticationIsNotRequiredAndWithNoAttribute()
+        {
+            var result = ExecutionFilterAttribute.ProceedWithExecution(false, false, false);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ProceedWithExecutionReturnsFalseWhenAuthenticationIsNotRequiredAndWithAttribute()
+        {
+            var result = ExecutionFilterAttribute.ProceedWithExecution(false, false, true);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ProceedWithExecutionReturnsFalseWhenAuthenticationIsRequired()
+        {
+            var result = ExecutionFilterAttribute.ProceedWithExecution(false, true, false);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void SetCulture()
+        {
+            var actualCultureName = "";
+            var actualUiCultureName = "";
+
+            var thread = new Thread(() =>
+            {
+                ExecutionFilterAttribute.SetCulture(Thread.CurrentThread);
+
+                actualCultureName = Thread.CurrentThread.CurrentCulture.Name;
+                actualUiCultureName = Thread.CurrentThread.CurrentUICulture.Name;
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.AreEqual("en-US", actualCultureName);
+            Assert.AreEqual("en-US", actualUiCultureName);
+        }
+
+        [TestMethod]
+        public void OnActionExecuting()
+        {
+            const bool authenticationRequired = true;
+            const string token = "MyToken";
+
+            var authManager = new Mock<IAuthManager>();
+            authManager.Setup(c => c.VerifyAccessToken(It.IsAny<string>())).Returns<string>(value =>
+            {
+                if (value == token)
+                {
+                    return Task.FromResult(new AuthToken
+                    {
+                        IsVerified = true,
+                        Token = value,
+                        UserId = 1,
+                        ValidUntil = DateTime.Now.AddDays(1)
+                    });
+                }
+
+                return Task.FromResult(default(AuthToken));
+            });
+
+            var sut = new ExecutionFilterAttribute(authManager.Object, authenticationRequired);
+
+            var dictionary =
+                new HeaderDictionary(new Dictionary<string, StringValues> {{"Authorization", "Bearer " + token}});
+
+            var feature = new Mock<IHttpRequestFeature>();
+            feature.Setup(c => c.Headers).Returns(dictionary);
+
+            var controller = new BaseController();
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Features.Set(feature.Object);
+            var actionContext = new ActionContext(httpContext,
+                new RouteData(new RouteValueDictionary()), new ControllerActionDescriptor());
+            var context = new ActionExecutingContext(new ControllerContext(actionContext), new List<IFilterMetadata>(),
+                new ConcurrentDictionary<string, object>(), controller);
+
+            var thread = new Thread(() =>
+            {
+                sut.OnActionExecuting(context);
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.AreEqual(token, controller.Token.Token);
+        }
+
+        [TestMethod]
+        public void OnActionExecutingTokenInvalid()
+        {
+            const bool authenticationRequired = true;
+            const string token = "MyToken";
+
+            var authManager = new Mock<IAuthManager>();
+            authManager.Setup(c => c.VerifyAccessToken(It.IsAny<string>())).Returns<string>(value =>
+            {
+                if (value == token)
+                {
+                    return Task.FromResult(new AuthToken
+                    {
+                        IsVerified = true,
+                        Token = value,
+                        UserId = 1,
+                        ValidUntil = DateTime.Now.AddDays(1)
+                    });
+                }
+
+                return Task.FromResult(default(AuthToken));
+            });
+
+            var sut = new ExecutionFilterAttribute(authManager.Object, authenticationRequired);
+
+            var dictionary =
+                new HeaderDictionary(new Dictionary<string, StringValues> { { "Authorization", "Bearer " + token + "somesuffix" } });
+
+            var feature = new Mock<IHttpRequestFeature>();
+            feature.Setup(c => c.Headers).Returns(dictionary);
+
+            var controller = new BaseController();
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Features.Set(feature.Object);
+            var actionContext = new ActionContext(httpContext,
+                new RouteData(new RouteValueDictionary()), new ControllerActionDescriptor());
+            var context = new ActionExecutingContext(new ControllerContext(actionContext), new List<IFilterMetadata>(),
+                new ConcurrentDictionary<string, object>(), controller);
+
+            var thread = new Thread(() =>
+            {
+                sut.OnActionExecuting(context);
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.IsNull(controller.Token);
+        }
+
+        private static MethodInfo GetMethodInfo<T>(Expression<Action<T>> expression)
+        {
+            if (expression.Body is MethodCallExpression member)
+                return member.Method;
+
+            throw new ArgumentException("Expression is not a method", "expression");
+        }
+
+        [Authenticate]
+        private void TestControllerWithAuthenticateAttribute()
+        {
+            // Method intentionally left empty.
+        }
+
+        private void TestControllerWithoutAuthenticateAttribute()
+        {
+            // Method intentionally left empty.
         }
 
         private Models.TransferObjects.AuthToken GetAuthToken(string tokenString, bool isVerified)

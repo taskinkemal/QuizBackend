@@ -47,7 +47,7 @@ namespace WebCommon.BaseControllers
         private static bool IsSimpleType(Type type)
         {
             return
-                type.IsPrimitive ||
+                type.IsPrimitive || type.IsEnum ||
                 new[] {
                     typeof(Enum),
                     typeof(string),

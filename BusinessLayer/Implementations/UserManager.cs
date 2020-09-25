@@ -6,6 +6,7 @@ using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DbModels;
 using Models.TransferObjects;
+using Serilog.Events;
 
 namespace BusinessLayer.Implementations
 {
@@ -56,14 +57,11 @@ namespace BusinessLayer.Implementations
 
             await Context.SaveChangesAsync();
 
-            if (user != null)
-            {
-                emailManager.Send(email, "Reset your password", "Here is your token: " + token);
+            emailManager.Send(email, "Reset your password", "Here is your token: " + token);
 
-                return true;
-            }
+            LogManager.AddLog(LogCategory.Email, "Password reset email sent: {email}", LogEventLevel.Information, email);
 
-            return false;
+            return true;
         }
 
         /// <summary>
@@ -194,20 +192,15 @@ namespace BusinessLayer.Implementations
                 return false;
             }
 
-            if (found.Id == userId)
-            {
-                found.FirstName = user.FirstName;
-                found.LastName = user.LastName;
-                found.PictureUrl = user.PictureUrl;
+            found.FirstName = user.FirstName;
+            found.LastName = user.LastName;
+            found.PictureUrl = user.PictureUrl;
 
-                Context.Users.Update(found);
+            Context.Users.Update(found);
 
-                await Context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         /// <summary>

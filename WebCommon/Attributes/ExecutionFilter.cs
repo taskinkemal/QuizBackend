@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Linq;
 using System.Net;
@@ -11,6 +10,7 @@ using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using WebCommon.Interfaces;
 using System.Runtime.CompilerServices;
+using WebCommon.BaseControllers;
 
 [assembly: InternalsVisibleTo("WebCommon.Test")]
 namespace WebCommon.Attributes
@@ -41,20 +41,17 @@ namespace WebCommon.Attributes
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             RetrieveParameters(context.HttpContext.Request.Headers, out var accessToken);
-            SetCulture();
+            SetCulture(Thread.CurrentThread);
 
             var result = ValidateRequest(context.Controller as IBaseController, accessToken).Result;
 
-            if (result.isValid || !(authenticationRequired || HasAuthenticateAttribute(context)))
+            if (ProceedWithExecution(result.isValid, authenticationRequired, HasAuthenticateAttribute(context.ActionDescriptor as ControllerActionDescriptor)))
             {
                 base.OnActionExecuting(context);
             }
             else
             {
-                context.Result = new JsonResult(new HttpErrorMessage(result.errPhrase))
-                {
-                    StatusCode = (int)HttpStatusCode.Unauthorized
-                };
+                context.Result = ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, result.errPhrase);
             }
         }
 
@@ -118,24 +115,20 @@ namespace WebCommon.Attributes
             return headers.ContainsKey(key) ? Convertor.ToString(headers[key].First(), defaultValue) : defaultValue;
         }
 
-        private static void SetCulture()
+        internal static void SetCulture(Thread t)
         {
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
-            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+            t.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            t.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
         }
 
-        private static bool HasAuthenticateAttribute(ActionExecutingContext context)
+        internal static bool ProceedWithExecution(bool isValid, bool authenticationRequired, bool hasAuthenticateAttribute)
         {
-            var controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
+            return isValid || !(authenticationRequired || hasAuthenticateAttribute);
+        }
 
-            if (controllerActionDescriptor != null)
-            {
-                // Check if the attribute exists on the action method
-                if (controllerActionDescriptor.MethodInfo?.GetCustomAttributes(inherit: true)?.Any(a => a.GetType().Equals(typeof(AuthenticateAttribute))) ?? false)
-                    return true;
-            }
-
-            return false;
+        internal static bool HasAuthenticateAttribute(ControllerActionDescriptor descriptor)
+        {
+            return descriptor?.MethodInfo?.GetCustomAttributes(true).Any(a => a is AuthenticateAttribute) ?? false;
         }
     }
 }

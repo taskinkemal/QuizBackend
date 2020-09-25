@@ -24,9 +24,9 @@ namespace BusinessLayer.Test
             return new AuthManager(context, Mock.Of<ILogManager>());
         }
 
-        internal static UserManager GetUserManager(QuizContext context, IAuthManager authManager)
+        internal static UserManager GetUserManager(QuizContext context, IAuthManager authManager, ILogManager logManager = null)
         {
-            return new UserManager(context, authManager, Mock.Of<ILogManager>(), Mock.Of<IEmailManager>());
+            return new UserManager(context, authManager, logManager ?? Mock.Of<ILogManager>(), Mock.Of<IEmailManager>());
         }
 
         internal static async Task<User> AddUserAsync(QuizContext context, int testId, string email = "", string password = "", bool isVerified = true)

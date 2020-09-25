@@ -7,17 +7,12 @@ namespace Common
     /// <summary>
     /// 
     /// </summary>
-    public sealed class AuthenticationHelper
+    public static class AuthenticationHelper
     {
         private const string Alphabet = "abcdefghijklmnoqprsqtuwxyz0123456789.";
 
-        private static Random random;
-
-        static AuthenticationHelper()
-        {
-            random = new Random(DateTime.Now.Millisecond);
-        }
-
+        private static readonly Random random = new Random(DateTime.Now.Millisecond);
+        
         /// <summary>
         /// 
         /// </summary>

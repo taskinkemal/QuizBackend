@@ -1,8 +1,7 @@
-﻿using Serilog;
-using Serilog.Events;
+﻿using Serilog.Events;
 using System;
 using Common.Interfaces;
-using Microsoft.Extensions.Configuration;
+using System.Linq;
 
 namespace Common.Implementations
 {
@@ -11,35 +10,67 @@ namespace Common.Implementations
     /// </summary>
     public class LogManager : ILogManager
     {
+        private readonly ILogAdapter logAdapter;
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="configuration"></param>
-        public LogManager(IConfiguration configuration)
+        /// <param name="logAdapter"></param>
+        public LogManager(ILogAdapter logAdapter)
         {
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration)
-                .CreateLogger();
+            this.logAdapter = logAdapter;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="logMessage"></param>
+        /// <param name="category"></param>
+        /// <param name="messageTemplate"></param>
         /// <param name="level"></param>
-        public void AddLog(string logMessage, LogEventLevel level = LogEventLevel.Information)
+        /// <param name="logArguments"></param>
+        public void AddLog(LogCategory category, string messageTemplate, LogEventLevel level, params object[] logArguments)
         {
-            Log.Write(level, logMessage);
+            AddLog(category, null, messageTemplate, level, logArguments);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="category"></param>
+        /// <param name="exc"></param>
+        /// <param name="logArguments"></param>
+        public void AddLog(LogCategory category, Exception exc, params object[] logArguments)
+        {
+            AddLog(category, exc, "Quiz exception", LogEventLevel.Error, logArguments);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="category"></param>
         /// <param name="exc"></param>
         /// <param name="messageTemplate"></param>
         /// <param name="level"></param>
-        public void AddLog(Exception exc, string messageTemplate = "", LogEventLevel level = LogEventLevel.Error)
+        /// <param name="logArguments"></param>
+        private void AddLog(LogCategory category, Exception exc, string messageTemplate, LogEventLevel level, params object[] logArguments)
         {
-            Log.Write(level, exc, messageTemplate ?? "Quiz exception");
+            var logParameters = CreateLogParameters(category);
+
+            var pTemplate = messageTemplate ?? "";
+            pTemplate += " {@LogParameters}";
+
+            var list = logArguments;
+            list = list.Concat(new[] { logParameters }).ToArray();
+
+            logAdapter.Write(level, exc, pTemplate, list);
+        }
+
+        private static LogParameters CreateLogParameters(LogCategory category)
+        {
+            return new LogParameters
+            {
+                CategoryId = (int)category
+            };
         }
     }
 }
