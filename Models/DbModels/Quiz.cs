@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
 namespace Models.DbModels
@@ -15,6 +16,18 @@ namespace Models.DbModels
         /// </summary>
         [DataMember]
         public int Id { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DataMember]
+        public int QuizId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DataMember]
+        public QuizStatus Status { get; set; }
 
         /// <summary>
         /// 
@@ -38,6 +51,7 @@ namespace Models.DbModels
         /// 
         /// </summary>
         [DataMember]
+        [NotMapped]
         public IEnumerable<int> QuestionIds { get; set; }
 
         /// <summary>
@@ -51,12 +65,6 @@ namespace Models.DbModels
         /// </summary>
         [DataMember]
         public bool TimeConstraint { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [DataMember]
-        public IEnumerable<int> PoolIds { get; set; }
 
         /// <summary>
         /// 
@@ -97,7 +105,7 @@ namespace Models.DbModels
         /// <summary>
         /// 
         /// </summary>
-        [DataMember(IsRequired=false)]
+        [DataMember(IsRequired = false)]
         public DateTime AvailableTo { get; set; }
     }
 }

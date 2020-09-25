@@ -30,6 +30,12 @@ namespace BusinessLayer.Context
 
             modelBuilder.Entity<OneTimeToken>()
                 .HasKey(c => c.Id);
+
+            modelBuilder.Entity<QuizIdentity>()
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<Quiz>()
+                .HasKey(c => c.Id);
         }
 
         /// <summary>
@@ -46,5 +52,15 @@ namespace BusinessLayer.Context
         /// 
         /// </summary>
         public DbSet<OneTimeToken> OneTimeTokens { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<Quiz> Quizes { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<QuizIdentity> QuizIdentities { get; set; }
     }
 }

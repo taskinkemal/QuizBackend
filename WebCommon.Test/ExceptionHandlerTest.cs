@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using BusinessLayer.Interfaces;
 using Common;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,7 @@ namespace WebCommon.Test
                 .Setup(c => c.AddLog(LogCategory.GeneralError, It.IsAny<Exception>(), It.IsAny<object[]>()))
                 .Callback((LogCategory category, Exception e, object[] logArguments) => { actual = e; });
 
-            var sut = new ExceptionHandlerAttribute(logManager.Object);
+            var sut = new ExceptionHandlerAttribute(Mock.Of<IContextManager>(), logManager.Object);
 
             var result = sut.ProcessException(exception);
 
@@ -42,7 +43,7 @@ namespace WebCommon.Test
         [TestMethod]
         public void OnExceptionNotImplemented()
         {
-            var sut = new ExceptionHandlerAttribute(Mock.Of<ILogManager>());
+            var sut = new ExceptionHandlerAttribute(Mock.Of<IContextManager>(), Mock.Of<ILogManager>());
 
             var result = sut.ProcessException(new NotImplementedException());
             
@@ -53,7 +54,7 @@ namespace WebCommon.Test
         [TestMethod]
         public async Task HandleException()
         {
-            var sut = new ExceptionHandlerAttribute(Mock.Of<ILogManager>());
+            var sut = new ExceptionHandlerAttribute(Mock.Of<IContextManager>(), Mock.Of<ILogManager>());
             var actualStatusCode = 0;
 
             var feature = new Mock<IHttpResponseFeature>();

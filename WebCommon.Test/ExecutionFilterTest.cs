@@ -41,7 +41,7 @@ namespace WebCommon.Test
                 .SetupSet(p => p.Token = It.IsAny<AuthToken>())
                 .Callback<AuthToken>(value => actual = value);
 
-            var sut = new ExecutionFilterAttribute(authManager, true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
 
             var result = await sut.ValidateRequest(controller.Object, tokenString);
 
@@ -58,7 +58,7 @@ namespace WebCommon.Test
             var token = GetAuthToken(tokenString, false);
             var authManager = GetAuthManager(token);
 
-            var sut = new ExecutionFilterAttribute(authManager, true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), tokenString);
 
@@ -73,7 +73,7 @@ namespace WebCommon.Test
 
             var authManager = GetAuthManager(null);
 
-            var sut = new ExecutionFilterAttribute(authManager, true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), tokenString);
 
@@ -84,7 +84,7 @@ namespace WebCommon.Test
         [TestMethod]
         public async Task ValidateRequestNoToken()
         {
-            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), true);
+            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), true);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), null);
 
@@ -95,7 +95,7 @@ namespace WebCommon.Test
         [TestMethod]
         public async Task ValidateRequestInvalidController()
         {
-            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), true);
+            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), true);
 
             var result = await sut.ValidateRequest(null, "token");
 
@@ -286,7 +286,7 @@ namespace WebCommon.Test
                 return Task.FromResult(default(AuthToken));
             });
 
-            var sut = new ExecutionFilterAttribute(authManager.Object, authenticationRequired);
+            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), authenticationRequired);
 
             var dictionary =
                 new HeaderDictionary(new Dictionary<string, StringValues> {{"Authorization", "Bearer " + token}});
@@ -337,7 +337,7 @@ namespace WebCommon.Test
                 return Task.FromResult(default(AuthToken));
             });
 
-            var sut = new ExecutionFilterAttribute(authManager.Object, authenticationRequired);
+            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), authenticationRequired);
 
             var dictionary =
                 new HeaderDictionary(new Dictionary<string, StringValues> { { "Authorization", "Bearer " + token + "somesuffix" } });

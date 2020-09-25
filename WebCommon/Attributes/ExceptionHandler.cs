@@ -6,6 +6,7 @@ using Common;
 using Common.Interfaces;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using BusinessLayer.Interfaces;
 
 [assembly: InternalsVisibleTo("WebCommon.Test")]
 namespace WebCommon.Attributes
@@ -15,14 +16,17 @@ namespace WebCommon.Attributes
     /// </summary>
     public class ExceptionHandlerAttribute : ExceptionFilterAttribute
     {
+        private readonly IContextManager contextManager;
         private readonly ILogManager logManager;
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="contextManager"></param>
         /// <param name="logManager"></param>
-        public ExceptionHandlerAttribute(ILogManager logManager)
+        public ExceptionHandlerAttribute(IContextManager contextManager, ILogManager logManager)
         {
+            this.contextManager = contextManager;
             this.logManager = logManager;
         }
 
@@ -34,6 +38,8 @@ namespace WebCommon.Attributes
         public override Task OnExceptionAsync(ExceptionContext context)
         {
             var result = ProcessException(context.Exception);
+
+            contextManager.Rollback();
 
             context.HttpContext.Response.StatusCode = (int)result.status;
             context.Result = new JsonResult(new HttpErrorMessage(result.code));

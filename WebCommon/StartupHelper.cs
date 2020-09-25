@@ -25,8 +25,10 @@ namespace WebCommon
             services.AddSingleton<ILogAdapter, LogAdapter>();
             services.AddSingleton<IEmailManager, EmailManager>();
 
+            services.AddScoped<IContextManager, ContextManager>();
             services.AddScoped<IAuthManager, AuthManager>();
             services.AddScoped<IUserManager, UserManager>();
+            services.AddScoped<IQuizManager, QuizManager>();
         }
 
         /// <summary>

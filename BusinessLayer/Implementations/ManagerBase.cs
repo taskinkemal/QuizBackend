@@ -1,7 +1,6 @@
 ﻿using BusinessLayer.Context;
 using Common.Interfaces;
 
-
 namespace BusinessLayer.Implementations
 {
     /// <summary>

@@ -21,16 +21,19 @@ namespace WebCommon.Attributes
     public class ExecutionFilterAttribute : ActionFilterAttribute
     {
         private readonly IAuthManager authManager;
+        private readonly IContextManager contextManager;
         private readonly bool authenticationRequired;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="authManager"></param>
+        /// <param name="contextManager"></param>
         /// <param name="authenticationRequired"></param>
-        public ExecutionFilterAttribute(IAuthManager authManager, bool authenticationRequired)
+        public ExecutionFilterAttribute(IAuthManager authManager, IContextManager contextManager, bool authenticationRequired)
         {
             this.authManager = authManager;
+            this.contextManager = contextManager;
             this.authenticationRequired = authenticationRequired;
         }
 
@@ -42,6 +45,8 @@ namespace WebCommon.Attributes
         {
             RetrieveParameters(context.HttpContext.Request.Headers, out var accessToken);
             SetCulture(Thread.CurrentThread);
+
+            contextManager.BeginTransaction();
 
             var result = ValidateRequest(context.Controller as IBaseController, accessToken).Result;
 
