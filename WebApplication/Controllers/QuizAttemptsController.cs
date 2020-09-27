@@ -37,7 +37,7 @@ namespace WebApplication.Controllers
         /// <response code="401">User is not authorized to update the quiz attempt.</response>
         /// <response code="409">Quiz attempt status is not acceptable.</response>
         /// <response code="406">Quiz end date has passed.</response>
-        [ProducesResponseType(typeof(AuthToken), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Conflict)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
@@ -47,7 +47,7 @@ namespace WebApplication.Controllers
             var result = await quizAttemptManager.UpdateAttempt(Token.UserId, data);
 
             return
-                result == UpdateQuizAttemptResponse.Success ? ControllerHelper.CreateResponse(result) :
+                result == UpdateQuizAttemptResponse.Success ? ControllerHelper.CreateResponse(true) :
                 result == UpdateQuizAttemptResponse.NotAuthorized ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized") :
                 result == UpdateQuizAttemptResponse.StatusError ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError") :
                     ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "DateError");
