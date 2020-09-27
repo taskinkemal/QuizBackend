@@ -3,27 +3,23 @@
     /// <summary>
     /// 
     /// </summary>
-    public enum QuizResult
+    public enum QuizAttemptStatus : byte
     {
         /// <summary>
         /// 
         /// </summary>
-        NotAttempted,
+        Incomplete = 1,
         /// <summary>
         /// 
         /// </summary>
-        Started,
+        Completed = 2,
         /// <summary>
         /// 
         /// </summary>
-        Attempted,
+        Passed = 3,
         /// <summary>
         /// 
         /// </summary>
-        Passed,
-        /// <summary>
-        /// 
-        /// </summary>
-        Failed
+        Failed = 4
     }
 }

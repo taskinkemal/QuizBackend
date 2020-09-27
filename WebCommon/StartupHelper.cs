@@ -29,6 +29,7 @@ namespace WebCommon
             services.AddScoped<IAuthManager, AuthManager>();
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IQuizManager, QuizManager>();
+            services.AddScoped<IQuizAttemptManager, QuizAttemptManager>();
         }
 
         /// <summary>

@@ -25,12 +25,17 @@ namespace Models.DbModels
         /// <summary>
         /// 
         /// </summary>
+        public QuizAttemptStatus Status { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime StartDate { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         /// <summary>
         /// 
@@ -46,10 +51,5 @@ namespace Models.DbModels
         /// 
         /// </summary>
         public decimal Score { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public QuizResult Result { get; set; }
     }
 }

@@ -94,18 +94,24 @@ namespace Models.DbModels
         /// 
         /// </summary>
         [DataMember(IsRequired = false)]
-        public DateTime ShowResults { get; set; }
+        public DateTime? ShowResults { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [DataMember(IsRequired = false)]
-        public DateTime AvailableFrom { get; set; }
+        public DateTime? AvailableFrom { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [DataMember(IsRequired = false)]
-        public DateTime AvailableTo { get; set; }
+        public DateTime? AvailableTo { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DataMember(IsRequired = false)]
+        public QuizAttempt LastAttempt { get; set; }
     }
 }

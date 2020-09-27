@@ -29,49 +29,27 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<List<Quiz>> GetUserQuizList(int userId)
         {
-            var quizIdentities = Context.QuizIdentities.ToList();
+            //TODO: If the availableTo is passed, or time is up, fix the quizattemptstatus.
 
-            var list = new List<Quiz>();
+            var attempts = Context.QuizAttempts
+                .ToList()
+                .Where(a => a.UserId == userId)
+                .GroupBy(a => a.QuizId, (key, g) => g.OrderByDescending(p => p.Id).FirstOrDefault())
+                .ToList();
 
-            foreach (var quizIdentity in quizIdentities)
+            var quizes = (
+                from qi in Context.QuizIdentities
+                join q in Context.Quizes on qi.Id equals q.QuizId
+                where q.Status == QuizStatus.Current
+                select q).ToList();
+
+
+            foreach (var quiz in quizes)
             {
-                if (quizIdentity.Id == 1)
-                {
-                    list.Add(new Quiz
-                    {
-                        Id = 1,
-                        Title = "Sample Quiz",
-                        Intro = "This is a sample quiz",
-                        Version = 1,
-                        TimeConstraint = true,
-                        TimeLimitInSeconds = 300,
-                        ShuffleQuestions = true,
-                        ShuffleOptions = true,
-                        PassScore = 60,
-                        Repeatable = true,
-                        QuestionIds = new List<int> { 3, 4, 5 }
-                    });
-                }
-                else if (quizIdentity.Id == 2)
-                {
-                    list.Add(new Quiz
-                    {
-                        Id = 2,
-                        Title = "Driving License Test",
-                        Intro = "This is a sample quiz for the driving license.",
-                        Version = 1,
-                        TimeConstraint = true,
-                        TimeLimitInSeconds = 600,
-                        ShuffleQuestions = true,
-                        ShuffleOptions = true,
-                        PassScore = 90,
-                        Repeatable = true,
-                        QuestionIds = new List<int> { 6, 7, 8, 9 }
-                    });
-                }
+                quiz.LastAttempt = attempts.FirstOrDefault(a => a.QuizId == quiz.Id);
             }
 
-            return await Task.FromResult(list);
+            return await Task.FromResult(quizes);
         }
     }
 }
