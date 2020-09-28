@@ -23,3 +23,13 @@ Currently only built-in login functionality is supported.
 Password helper functions:
 - [GET] Password -> returns password criteria
 - [POST] Password/ValidatePassword -> validates password against password criteria.
+
+## Quizzes
+
+1. [GET] Questions/Quiz
+-> returns a list of quizzes that the user is assigned to.
+-> Id is the effective quiz id. The field QuizId is the quiz identity id, please ignore this.
+2. [GET] Questions/Quiz/{Quiz Id}
+-> returns a list of questions of the given quiz. This includes the option id's for each question. Questions are ordered.
+3. [GET] Options/Quiz/{Quiz Id}
+-> returns a list of options of the given quiz. Options are ordered.
