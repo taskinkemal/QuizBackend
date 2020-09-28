@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.DbModels
 {
@@ -20,36 +21,17 @@ namespace Models.DbModels
         /// <summary>
         /// 
         /// </summary>
-        public int Level { get; set; }
+        public byte Level { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IEnumerable<int> PoolIds { get; set; }
+        public QuestionType Type { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public IEnumerable<string> Tags { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public QuestionType QuestionType { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
+        [NotMapped]
         public IEnumerable<int> OptionIds { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public IEnumerable<int> CorrectOptionIds { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<int, int> MatchingOptionIds { get; set; }
     }
 }

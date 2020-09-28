@@ -44,6 +44,21 @@ namespace BusinessLayer.Context
 
             modelBuilder.Entity<QuizAttempt>()
                 .HasKey(c => c.Id);
+
+            modelBuilder.Entity<QuizAssignment>()
+                .HasKey(c => new { c.QuizIdentityId, c.Email });
+
+            modelBuilder.Entity<Question>()
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<Option>()
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<QuestionOption>()
+                .HasKey(c => new { c.QuestionId, c.OptionId });
+
+            modelBuilder.Entity<QuizQuestion>()
+                .HasKey(c => new { c.QuizId, c.QuestionId });
         }
 
         /// <summary>
@@ -75,5 +90,30 @@ namespace BusinessLayer.Context
         /// 
         /// </summary>
         public DbSet<QuizAttempt> QuizAttempts { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<QuizAssignment> QuizAssignments { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<Question> Questions { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<Option> Options { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<QuestionOption> QuestionOptions { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
     }
 }

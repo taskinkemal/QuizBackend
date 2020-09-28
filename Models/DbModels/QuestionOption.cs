@@ -3,21 +3,22 @@
     /// <summary>
     /// 
     /// </summary>
-    public class Option
+    public class QuestionOption
     {
         /// <summary>
         /// 
         /// </summary>
-        public int Id { get; set; }
+        public int QuestionId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Body { get; set; }
+        public int OptionId { get; set; }
+
 
         /// <summary>
         /// 
         /// </summary>
-        public bool IsCorrect { get; set; }
+        public byte OptionOrder { get; set; }
     }
 }

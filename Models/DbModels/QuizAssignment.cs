@@ -3,21 +3,16 @@
     /// <summary>
     /// 
     /// </summary>
-    public class Option
+    public class QuizAssignment
     {
         /// <summary>
         /// 
         /// </summary>
-        public int Id { get; set; }
+        public int QuizIdentityId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Body { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsCorrect { get; set; }
+        public string Email { get; set; }
     }
 }

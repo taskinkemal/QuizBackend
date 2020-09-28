@@ -51,5 +51,10 @@ namespace Models.DbModels
         /// 
         /// </summary>
         public decimal Score { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int TimeSpent { get; set; }
     }
 }

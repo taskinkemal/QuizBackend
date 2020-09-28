@@ -40,6 +40,8 @@ namespace BusinessLayer.Implementations
             var quizes = (
                 from qi in Context.QuizIdentities
                 join q in Context.Quizes on qi.Id equals q.QuizId
+                join ua in Context.QuizAssignments on qi.Id equals ua.QuizIdentityId
+                join u in Context.Users on new { F1 = ua.Email, F2 = userId } equals new { F1 = u.Email, F2 = u.Id }
                 where q.Status == QuizStatus.Current
                 select q).ToList();
 

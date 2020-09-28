@@ -3,23 +3,15 @@
     /// <summary>
     /// 
     /// </summary>
-    public enum QuestionType
+    public enum QuestionType : byte
     {
         /// <summary>
         /// Multiple options, one correct option
         /// </summary>
-        MultiSelect,
+        MultiSelect = 1,
         /// <summary>
         /// Multiple options, multiple correct options
         /// </summary>
-        MultiSelectMultiOptions,
-        /// <summary>
-        /// 
-        /// </summary>
-        TrueFalse,
-        /// <summary>
-        /// 
-        /// </summary>
-        Match
+        MultiSelectMultiOptions = 2
     }
 }

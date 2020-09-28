@@ -2,6 +2,8 @@
 using Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
 using WebCommon.BaseControllers;
+using BusinessLayer.Interfaces;
+using System.Threading.Tasks;
 
 namespace WebApplication.Controllers
 {
@@ -12,6 +14,17 @@ namespace WebApplication.Controllers
     [Route("[controller]")]
     public class QuestionsController : AuthController
     {
+        private readonly IQuestionManager questionManager;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="questionManager"></param>
+        public QuestionsController(IQuestionManager questionManager)
+        {
+            this.questionManager = questionManager;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -19,49 +32,9 @@ namespace WebApplication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Quiz/{id}")]
-        public IEnumerable<Question> Get(int id)
+        public async Task<IEnumerable<Question>> Get(int id)
         {
-            var list = new List<Question>();
-
-            if (id == 1)
-            {
-                list.Add(new Question
-                {
-                    Id = 3,
-                    Body = "This is a question. Correct answer is easy to find.",
-                    Level = 3,
-                    PoolIds = new List<int> { 3 },
-                    QuestionType = QuestionType.MultiSelect,
-                    OptionIds = new List<int> { 2, 3, 4, 5 },
-                    CorrectOptionIds = new List<int> { 3 },
-                    Tags = new List<string> { "Sample", "Easy Questions" }
-                });
-
-                list.Add(new Question
-                {
-                    Id = 4,
-                    Body = "Is this true or false.",
-                    Level = 2,
-                    PoolIds = new List<int> { 3 },
-                    QuestionType = QuestionType.TrueFalse,
-                    CorrectOptionIds = new List<int> { 1 },
-                    Tags = new List<string> { "Sample", "Easy Questions" }
-                });
-
-                list.Add(new Question
-                {
-                    Id = 5,
-                    Body = "This is a multi answer question. Correct answers is easy to find.",
-                    Level = 3,
-                    PoolIds = new List<int> { 3 },
-                    QuestionType = QuestionType.MultiSelect,
-                    OptionIds = new List<int> { 8, 9, 10, 11 },
-                    CorrectOptionIds = new List<int> { 8, 10 },
-                    Tags = new List<string> { "Sample", "Easy Questions" }
-                });
-            }
-
-            return list;
+            return await questionManager.GetQuizQuestions(id);
         }
     }
 }

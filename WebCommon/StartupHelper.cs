@@ -30,6 +30,8 @@ namespace WebCommon
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IQuizManager, QuizManager>();
             services.AddScoped<IQuizAttemptManager, QuizAttemptManager>();
+            services.AddScoped<IQuestionManager, QuestionManager>();
+            services.AddScoped<IOptionManager, OptionManager>();
         }
 
         /// <summary>

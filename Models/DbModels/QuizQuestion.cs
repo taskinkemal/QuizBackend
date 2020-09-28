@@ -1,17 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace Models.DbModels
+﻿namespace Models.DbModels
 {
     /// <summary>
     /// 
     /// </summary>
-    public class Answer
+    public class QuizQuestion
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public int UserId { get; set; }
-
         /// <summary>
         /// 
         /// </summary>
@@ -25,6 +18,6 @@ namespace Models.DbModels
         /// <summary>
         /// 
         /// </summary>
-        public IEnumerable<int> Options { get; set; }
+        public byte QuestionOrder { get; set; }
     }
 }
