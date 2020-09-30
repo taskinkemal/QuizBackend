@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
@@ -44,6 +45,19 @@ namespace BusinessLayer.Test
             return user.Entity;
         }
 
+        internal static Models.TransferObjects.User CreateUserTo(int testId, string email = "", string password = "")
+        {
+            return new Models.TransferObjects.User
+            {
+                Email = !string.IsNullOrWhiteSpace(email) ? email : "user" + testId + "@mymail.com",
+                FirstName = "Name" + testId,
+                LastName = "Surname" + testId,
+                DeviceId = "",
+                PictureUrl = "",
+                Password = !string.IsNullOrWhiteSpace(password) ? password : "otherpassword123_" + testId
+            };
+        }
+
         internal static async Task<UserToken> AddAuthTokenAsync(QuizContext context, int userId, string deviceId, string token, bool isValid)
         {
             var userToken = await context.UserTokens.AddAsync(new UserToken
@@ -68,6 +82,67 @@ namespace BusinessLayer.Test
             });
 
             return oneTimeToken.Entity;
+        }
+
+        internal static Quiz CreateQuiz(int testId)
+        {
+            return new Quiz
+            {
+                Title = "Quiz Title " + testId,
+                Intro = "Quiz Intro " + testId
+            };
+        }
+
+        internal static Question CreateQuestion(int testId, QuestionType type = QuestionType.MultiSelect, byte level = 3)
+        {
+            return new Question
+            {
+                Body = "Question Body " + testId,
+                Type = type,
+                Level = level
+            };
+        }
+
+        internal static Option CreateOption(int testId, bool isCorrect)
+        {
+            return new Option
+            {
+                Body = "Option Body " + testId,
+                IsCorrect = isCorrect
+            };
+        }
+
+        internal static async Task<(int QuizId, List<int> QuestionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
+        {
+            var logManager = Mock.Of<ILogManager>();
+            var optionManager = new OptionManager(context, logManager);
+            var quizManager = new QuizManager(context, logManager);
+            var questionManager = new QuestionManager(context, logManager);
+            var userManager = GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
+
+            var userId = await userManager.InsertUserInternalAsync(CreateUserTo(0), true);
+            await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));
+            var quizId = await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(1));
+            await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
+
+            var questionIds = new List<int>();
+
+            for (var i = 0; i < questionCount; i++)
+            {
+                var questionId = await questionManager.InsertQuestionInternalAsync(CreateQuestion(i));
+                await questionManager.AssignQuestionInternalAsync(quizId, questionId);
+
+                questionIds.Add(questionId);
+
+                for (var j = 0; j < optionCount; j++)
+                {
+                    var optionId = await optionManager.InsertOptionInternalAsync(CreateOption(j, j == 1));
+
+                    await optionManager.AssignOptionInternalAsync(questionId, optionId);
+                }
+            }
+
+            return (QuizId: quizId, QuestionIds: questionIds);
         }
     }
 }

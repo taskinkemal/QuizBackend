@@ -51,9 +51,10 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetAuthManager(context);
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                var userManager = ManagerTestHelper.GetUserManager(context, sut);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), true);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -79,9 +80,10 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetAuthManager(context);
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                var userManager = ManagerTestHelper.GetUserManager(context, sut);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), true);
+                await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -130,7 +132,6 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string deviceId = "mydevice";
-            User user;
             AuthToken token;
             UserToken existingToken;
 
@@ -138,7 +139,7 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetAuthManager(context);
 
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
 
                 await context.SaveChangesAsync();
 
@@ -156,14 +157,13 @@ namespace BusinessLayer.Test
             const string password = "mypassword123";
             const string email = "user1@mymail.com";
             const string deviceId = "mydevice";
-            User user;
             AuthToken token;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var sut = ManagerTestHelper.GetAuthManager(context);
 
-                user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password);
 
                 await context.SaveChangesAsync();
 

@@ -36,9 +36,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager.Object);
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -63,9 +63,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -90,9 +90,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, true);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -288,8 +288,8 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.ForgotPassword, tokenString, true);
 
                 await context.SaveChangesAsync();
@@ -390,9 +390,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -402,7 +402,6 @@ namespace BusinessLayer.Test
                     FirstName = "FirstName",
                     LastName = "LastName",
                     Email = "newemail@myemail.com",
-                    IsVerified = false,
                     PictureUrl = "",
                     Password = "password111"
                 });
@@ -422,9 +421,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -434,7 +433,6 @@ namespace BusinessLayer.Test
                     FirstName = "FirstName",
                     LastName = "LastName",
                     Email = email,
-                    IsVerified = false,
                     PictureUrl = "",
                     Password = "password111"
                 });
@@ -454,9 +452,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -466,7 +464,6 @@ namespace BusinessLayer.Test
                     FirstName = "FirstName",
                     LastName = "LastName",
                     Email = "newemail@myemail.com",
-                    IsVerified = false,
                     PictureUrl = "",
                     Password = "p"
                 });
@@ -502,7 +499,6 @@ namespace BusinessLayer.Test
                     FirstName = newFirstName,
                     LastName = newLastName,
                     Email = email,
-                    IsVerified = true,
                     PictureUrl = newPictureUrl,
                     Password = "p"
                 });
@@ -541,7 +537,6 @@ namespace BusinessLayer.Test
                     FirstName = newFirstName,
                     LastName = newLastName,
                     Email = email,
-                    IsVerified = true,
                     PictureUrl = newPictureUrl,
                     Password = "p"
                 });
@@ -562,9 +557,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -589,9 +584,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, true);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
 
                 await context.SaveChangesAsync();
 
@@ -617,8 +612,8 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
 
                 await context.SaveChangesAsync();
 
@@ -687,9 +682,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, "differentToken", true);
 
                 await context.SaveChangesAsync();
@@ -716,9 +711,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, false);
 
                 await context.SaveChangesAsync();
@@ -745,9 +740,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password, false);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), false);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, "differentEmail@mymail.com", OneTimeTokenType.AccountVerification, tokenString, false);
 
                 await context.SaveChangesAsync();
@@ -774,9 +769,9 @@ namespace BusinessLayer.Test
             {
                 var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>());
 
-                await ManagerTestHelper.AddUserAsync(context, 0);
-                await ManagerTestHelper.AddUserAsync(context, 1, email, password);
-                await ManagerTestHelper.AddUserAsync(context, 2);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1, email, password), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
                 await ManagerTestHelper.AddOneTimeTokenAsync(context, email, OneTimeTokenType.AccountVerification, tokenString, true);
 
                 await context.SaveChangesAsync();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common;
@@ -8,6 +10,7 @@ using Models.DbModels;
 using Models.TransferObjects;
 using Serilog.Events;
 
+[assembly: InternalsVisibleTo("BusinessLayer.Test")]
 namespace BusinessLayer.Implementations
 {
     /// <summary>
@@ -36,7 +39,7 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email)
+        public async Task<bool> SendPasswordResetEmail(string email)
         {
             var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsVerified);
 
@@ -45,17 +48,7 @@ namespace BusinessLayer.Implementations
                 return false;
             }
 
-            var token = AuthenticationHelper.GenerateRandomString(160);
-
-            await Context.OneTimeTokens.AddAsync(new OneTimeToken
-            {
-                Email = email,
-                Token = token,
-                TokenType = (byte)OneTimeTokenType.ForgotPassword,
-                ValidUntil = DateTime.Now.AddDays(1)
-            });
-
-            await Context.SaveChangesAsync();
+            var token = await InsertOneTimeTokenAsync(email, OneTimeTokenType.ForgotPassword);
 
             emailManager.Send(email, "Reset your password", "Here is your token: " + token);
 
@@ -70,7 +63,7 @@ namespace BusinessLayer.Implementations
         /// <param name="oneTimeToken"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdatePassword(string oneTimeToken, string password)
+        public async Task<bool> UpdatePassword(string oneTimeToken, string password)
         {
             if (!string.IsNullOrWhiteSpace(oneTimeToken))
             {
@@ -107,7 +100,7 @@ namespace BusinessLayer.Implementations
         /// <param name="userId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdatePassword(int userId, string password)
+        public async Task<bool> UpdatePassword(int userId, string password)
         {
             if (!PasswordCriteria.IsValid(password))
             {
@@ -135,7 +128,7 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> DeleteUserAsync(int userId)
+        public async Task<bool> DeleteUserAsync(int userId)
         {
             var user = await Context.Users.FindAsync(userId);
 
@@ -156,18 +149,20 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<GenericManagerResponse<AuthToken, InsertUserResponse>> InsertUserAsync(Models.TransferObjects.User user)
+        public async Task<GenericManagerResponse<AuthToken, InsertUserResponse>> InsertUserAsync(Models.TransferObjects.User user)
         {
             var found = await Context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
 
             if (found == null)
             {
-                var userId = await InsertUserInternalAsync(user);
+                var userId = await InsertUserInternalAsync(user, false);
 
                 if (userId == 0)
                 {
                     return new GenericManagerResponse<AuthToken, InsertUserResponse>(InsertUserResponse.PasswordCriteriaNotSatisfied, null);
                 }
+
+                await SendAccountVerificationEmail(user.Email);
 
                 var token = await authManager.GenerateTokenAsync(userId, user.DeviceId);
 
@@ -183,7 +178,7 @@ namespace BusinessLayer.Implementations
         /// <param name="userId"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> UpdateUserAsync(int userId, Models.TransferObjects.User user)
+        public async Task<bool> UpdateUserAsync(int userId, Models.TransferObjects.User user)
         {
             var found = await Context.Users.FindAsync(userId);
 
@@ -208,7 +203,7 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<bool> SendAccountVerificationEmail(string email)
+        public async Task<bool> SendAccountVerificationEmail(string email)
         {
             var user = await Context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsVerified);
 
@@ -217,17 +212,7 @@ namespace BusinessLayer.Implementations
                 return false;
             }
 
-            var token = AuthenticationHelper.GenerateRandomString(160);
-
-            await Context.OneTimeTokens.AddAsync(new OneTimeToken
-            {
-                Email = email,
-                Token = token,
-                TokenType = (byte)OneTimeTokenType.AccountVerification,
-                ValidUntil = DateTime.Now.AddDays(1)
-            });
-
-            await Context.SaveChangesAsync();
+            var token = await InsertOneTimeTokenAsync(email, OneTimeTokenType.AccountVerification);
 
             emailManager.Send(email, "Verify your account", "Here is your token: " + token);
 
@@ -239,7 +224,7 @@ namespace BusinessLayer.Implementations
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.Task<AuthToken> VerifyAccount(OneTimeTokenRequest request)
+        public async Task<AuthToken> VerifyAccount(OneTimeTokenRequest request)
         {
             var oneTimeToken = await Context.OneTimeTokens.FirstOrDefaultAsync(t =>
                 t.Token == request.Token &&
@@ -271,7 +256,7 @@ namespace BusinessLayer.Implementations
             return token;
         }
 
-        private async System.Threading.Tasks.Task<int> InsertUserInternalAsync(Models.TransferObjects.User user)
+        internal async Task<int> InsertUserInternalAsync(Models.TransferObjects.User user, bool isVerified)
         {
             if (!PasswordCriteria.IsValid(user.Password))
             {
@@ -287,14 +272,29 @@ namespace BusinessLayer.Implementations
                 Email = user.Email,
                 PictureUrl = user.PictureUrl,
                 PasswordHash = passwordHash,
-                IsVerified = false
+                IsVerified = isVerified
             });
 
             await Context.SaveChangesAsync();
 
-            await SendAccountVerificationEmail(user.Email);
-
             return u.Entity.Id;
+        }
+
+        internal async Task<string> InsertOneTimeTokenAsync(string email, OneTimeTokenType tokenType)
+        {
+            var token = AuthenticationHelper.GenerateRandomString(160);
+
+            await Context.OneTimeTokens.AddAsync(new OneTimeToken
+            {
+                Email = email,
+                Token = token,
+                TokenType = (byte)tokenType,
+                ValidUntil = DateTime.Now.AddDays(1)
+            });
+
+            await Context.SaveChangesAsync();
+
+            return token;
         }
     }
 }

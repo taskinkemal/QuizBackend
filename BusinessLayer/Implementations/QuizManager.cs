@@ -32,7 +32,6 @@ namespace BusinessLayer.Implementations
             //TODO: If the availableTo is passed, or time is up, fix the quizattemptstatus.
 
             var attempts = Context.QuizAttempts
-                .ToList()
                 .Where(a => a.UserId == userId)
                 .GroupBy(a => a.QuizId, (key, g) => g.OrderByDescending(p => p.Id).FirstOrDefault())
                 .ToList();
@@ -52,6 +51,27 @@ namespace BusinessLayer.Implementations
             }
 
             return await Task.FromResult(quizes);
+        }
+
+        internal async Task<int> InsertQuizInternalAsync(int userId, Quiz quiz)
+        {
+            var quizIdentity = await Context.QuizIdentities.AddAsync(
+                new QuizIdentity
+                {
+                    OwnerId = userId
+                });
+
+            await Context.SaveChangesAsync();
+
+            quiz.QuizId = quizIdentity.Entity.Id;
+            quiz.Version = 1;
+            quiz.Status = QuizStatus.Current;
+
+            var insertedQuiz = await Context.Quizes.AddAsync(quiz);
+
+            await Context.SaveChangesAsync();
+
+            return insertedQuiz.Entity.Id;
         }
     }
 }

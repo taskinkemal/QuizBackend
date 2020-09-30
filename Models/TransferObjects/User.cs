@@ -33,11 +33,6 @@
         /// <summary>
         /// 
         /// </summary>
-        public bool IsVerified { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public string DeviceId { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<UpdateQuizAttemptResponse> UpdateAttempt(int userId, QuizAttempt attempt)
         {
-            if (attempt == null || userId != attempt.Id)
+            if (attempt == null || userId != attempt.UserId)
             {
                 return UpdateQuizAttemptResponse.NotAuthorized;
             }
@@ -70,6 +70,24 @@ namespace BusinessLayer.Implementations
             }
 
             return UpdateQuizAttemptResponse.Success;
+        }
+
+        internal async Task<QuizAttempt> InsertAttemptInternalAsync(int userId, int quizId)
+        {
+            var attempt = await Context.QuizAttempts.AddAsync(new QuizAttempt
+            {
+                UserId = userId,
+                QuizId = quizId,
+                Correct = 0,
+                Incorrect = 0,
+                StartDate = DateTime.Now,
+                Status = QuizAttemptStatus.Incomplete,
+                TimeSpent = 0
+            });
+
+            await Context.SaveChangesAsync();
+
+            return attempt.Entity;
         }
     }
 }

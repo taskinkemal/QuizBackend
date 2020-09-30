@@ -57,5 +57,35 @@ namespace BusinessLayer.Implementations
 
             return await Task.FromResult(questions);
         }
+
+        internal async Task<int> InsertQuestionInternalAsync(Question question)
+        {
+            var insertedQuestion= await Context.Questions.AddAsync(question);
+
+            await Context.SaveChangesAsync();
+
+            return insertedQuestion.Entity.Id;
+        }
+
+        internal async Task<QuizQuestion> AssignQuestionInternalAsync(int quizId, int questionId)
+        {
+            var list = Context.QuizQuestions
+                .Where(q => q.QuizId == quizId)
+                .Select(q => (int) q.QuestionOrder)
+                .ToList();
+
+            var questionOrder = list.Any() ? list.Max() : 0;
+
+            var insertedAssignment = await Context.QuizQuestions.AddAsync(new QuizQuestion
+            {
+                QuizId = quizId,
+                QuestionId = questionId,
+                QuestionOrder = (byte)(questionOrder + 1)
+            });
+
+            await Context.SaveChangesAsync();
+
+            return insertedAssignment.Entity;
+        }
     }
 }
