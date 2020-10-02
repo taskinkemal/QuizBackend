@@ -116,7 +116,7 @@ namespace BusinessLayer.Test
         {
             var logManager = Mock.Of<ILogManager>();
             var optionManager = new OptionManager(context, logManager);
-            var quizManager = new QuizManager(context, logManager);
+            var quizManager = new QuizManager(context, Mock.Of<IQuizAttemptManager>(), logManager);
             var questionManager = new QuestionManager(context, logManager);
             var userManager = GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
 
@@ -148,7 +148,7 @@ namespace BusinessLayer.Test
         internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)
         {
             var logManager = Mock.Of<ILogManager>();
-            var quizManager = new QuizManager(context, logManager);
+            var quizManager = new QuizManager(context, Mock.Of<IQuizAttemptManager>(), logManager);
 
             var userId = 0;
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));

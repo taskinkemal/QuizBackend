@@ -168,7 +168,14 @@ namespace BusinessLayer.Implementations
             };
         }
 
-        internal async Task<bool> FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="attempt"></param>
+        /// <param name="passScore"></param>
+        /// <param name="timeSpent"></param>
+        /// <returns></returns>
+        public async Task<bool> FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
         {
             if (attempt.Status != QuizAttemptStatus.Incomplete)
             {
