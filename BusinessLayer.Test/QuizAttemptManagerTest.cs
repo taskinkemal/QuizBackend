@@ -374,18 +374,15 @@ namespace BusinessLayer.Test
         }
 
         [TestMethod]
-        public void FinishQuizNull()
+        public async Task FinishQuizNull()
         {
             var sut = new QuizAttemptManager(null, null, Mock.Of<ILogManager>());
-            var task = sut.FinishQuizAsync(new QuizAttempt
+            var result = await sut.FinishQuizAsync(new QuizAttempt
             {
                 Status = QuizAttemptStatus.Completed
             }, null, 0);
 
-            task.Start();
-            task.Wait();
-
-            Assert.IsNotNull(task);
+            Assert.IsFalse(result);
         }
 
 

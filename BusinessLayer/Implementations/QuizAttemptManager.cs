@@ -168,11 +168,11 @@ namespace BusinessLayer.Implementations
             };
         }
 
-        internal async Task FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
+        internal async Task<bool> FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
         {
             if (attempt.Status != QuizAttemptStatus.Incomplete)
             {
-                return;
+                return false;
             }
 
             var questions = (await questionManager.GetQuizQuestions(attempt.QuizId)).ToList();
@@ -199,6 +199,8 @@ namespace BusinessLayer.Implementations
             Context.QuizAttempts.Update(attempt);
 
             await Context.SaveChangesAsync();
+
+            return true;
         }
 
         internal static (int CorrectCount, int IncorrectCount, decimal Score) EvaluateQuiz(List<Question> questions, List<QuestionAnswer> options)
