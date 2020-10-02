@@ -5,16 +5,16 @@ namespace Models.TransferObjects
     /// <summary>
     /// 
     /// </summary>
-    public class UpdateQuizAttemptResponse
+    public class UpdateQuizAttemptStatus
     {
         /// <summary>
         /// 
         /// </summary>
-        public UpdateQuizAttemptStatusResult Result { get; set; }
+        public int TimeSpent { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public QuizAttempt Attempt { get; set; }
+        public bool EndQuiz { get; set; }
     }
 }

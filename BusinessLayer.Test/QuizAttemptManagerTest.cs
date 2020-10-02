@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
-using BusinessLayer.Interfaces;
 using Common.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.DbModels;
@@ -16,7 +14,7 @@ namespace BusinessLayer.Test
     public class QuizAttemptManagerTest
     {
         [TestMethod]
-        public async Task UpdateAttemptNull()
+        public async Task UpdateStatusNull()
         {
             UpdateQuizAttemptResponse result;
 
@@ -25,128 +23,234 @@ namespace BusinessLayer.Test
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new QuizAttemptManager(context, logManager);
 
-                result = await sut.UpdateAttempt(2, null);
-            }
-
-            Assert.AreEqual(UpdateQuizAttemptResponse.NotAuthorized, result);
-        }
-
-        [TestMethod]
-        public async Task UpdateAttemptUserNotMatching()
-        {
-            UpdateQuizAttemptResponse result;
-            const int userId = 2;
-
-            using (var context = new QuizContext(ManagerTestHelper.Options))
-            {
-                var logManager = Mock.Of<ILogManager>();
-                var sut = new QuizAttemptManager(context, logManager);
-
-                result = await sut.UpdateAttempt(userId, new QuizAttempt
+                result = await sut.UpdateStatus(2, 0, new UpdateQuizAttemptStatus
                 {
-                    UserId = userId + 1
+                    EndQuiz = false,
+                    TimeSpent = 10
                 });
             }
 
-            Assert.AreEqual(UpdateQuizAttemptResponse.NotAuthorized, result);
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.NotAuthorized, result.Result);
+            Assert.IsNull(result.Attempt);
         }
 
         [TestMethod]
-        public async Task UpdateAttemptQuizNotFound()
+        public async Task UpdateStatusUserNotAssigned()
         {
             UpdateQuizAttemptResponse result;
-            const int userId = 2;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new QuizAttemptManager(context, logManager);
-
-                result = await sut.UpdateAttempt(userId, new QuizAttempt
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, false);
+                result = await sut.UpdateStatus(testData.UserId, 5, new UpdateQuizAttemptStatus
                 {
-                    UserId = userId,
-                    QuizId = 7
+                    TimeSpent = 10,
+                    EndQuiz = false
                 });
             }
 
-            Assert.AreEqual(UpdateQuizAttemptResponse.NotAuthorized, result);
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.NotAuthorized, result.Result);
+            Assert.IsNull(result.Attempt);
         }
 
         [TestMethod]
-        public async Task UpdateAttemptAvailableIntervalPassed()
+        public async Task UpdateStatusTimeUp()
         {
             UpdateQuizAttemptResponse result;
-            const int userId = 2;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new QuizAttemptManager(context, logManager);
-                var quizManager = new QuizManager(context, logManager);
-                var userManager = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
-
-                var ownerId = await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
-                var quizId = await quizManager.InsertQuizInternalAsync(ownerId, new Quiz
+                var quiz = new Quiz
                 {
-                    Title = "Quiz Title",
-                    Intro = "Quiz Intro",
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40
+                };
+
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Incomplete,
+                        StartDate = DateTime.Now
+                    });
+                await context.SaveChangesAsync();
+
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
+                {
+                    TimeSpent = 50,
+                    EndQuiz = false
+                });
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.TimeUp, result.Result);
+            Assert.AreNotEqual(QuizAttemptStatus.Incomplete, result.Attempt.Status);
+        }
+
+        [TestMethod]
+        public async Task UpdateStatusAvailableIntervalPassed()
+        {
+            UpdateQuizAttemptResponse result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuizAttemptManager(context, logManager);
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
                     AvailableTo = DateTime.Now.AddDays(-1)
-                });
+                };
 
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Incomplete,
+                        StartDate = DateTime.Now
+                    });
                 await context.SaveChangesAsync();
 
-                result = await sut.UpdateAttempt(userId, new QuizAttempt
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
                 {
-                    UserId = userId,
-                    QuizId = quizId
+                    TimeSpent = 30,
+                    EndQuiz = false
                 });
             }
 
-            Assert.AreEqual(UpdateQuizAttemptResponse.DateError, result);
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.DateError, result.Result);
+            Assert.AreNotEqual(QuizAttemptStatus.Incomplete, result.Attempt.Status);
         }
 
         [TestMethod]
-        public async Task UpdateAttemptStatusNotIncomplete()
+        public async Task UpdateStatusStatusNotIncomplete()
         {
             UpdateQuizAttemptResponse result;
-            const int userId = 2;
 
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new QuizAttemptManager(context, logManager);
-                var quizManager = new QuizManager(context, logManager);
-                var userManager = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
-
-                var ownerId = await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
-                var quizId = await quizManager.InsertQuizInternalAsync(ownerId, new Quiz
+                var quiz = new Quiz
                 {
-                    Title = "Quiz Title",
-                    Intro = "Quiz Intro",
-                    AvailableTo = DateTime.Now.AddDays(1)
-                });
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40
+                };
 
-                var attempt = await context.QuizAttempts.AddAsync(new QuizAttempt
-                {
-                    UserId = userId,
-                    QuizId = quizId,
-                    Correct = 0,
-                    Incorrect = 0,
-                    StartDate = DateTime.Now,
-                    Status = QuizAttemptStatus.Completed,
-                    TimeSpent = 0
-                });
-
-                var attemptEntity = attempt.Entity;
-
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Completed,
+                        StartDate = DateTime.Now
+                    });
                 await context.SaveChangesAsync();
 
-                attemptEntity.TimeSpent = 10;
-
-                result = await sut.UpdateAttempt(userId, attemptEntity);
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
+                {
+                    TimeSpent = 30,
+                    EndQuiz = false
+                });
             }
 
-            Assert.AreEqual(UpdateQuizAttemptResponse.StatusError, result);
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.StatusError, result.Result);
+            Assert.IsNull(result.Attempt);
+        }
+
+        [TestMethod]
+        public async Task UpdateStatusFinishQuiz()
+        {
+            UpdateQuizAttemptResponse result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuizAttemptManager(context, logManager);
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40
+                };
+
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Incomplete,
+                        StartDate = DateTime.Now
+                    });
+                await context.SaveChangesAsync();
+
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
+                {
+                    TimeSpent = 30,
+                    EndQuiz = true
+                });
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.Success, result.Result);
+            Assert.AreNotEqual(QuizAttemptStatus.Incomplete, result.Attempt.Status);
+            Assert.AreEqual(30, result.Attempt.TimeSpent);
+        }
+
+        [TestMethod]
+        public async Task UpdateStatusSuccess()
+        {
+            UpdateQuizAttemptResponse result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuizAttemptManager(context, logManager);
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40
+                };
+
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Incomplete,
+                        StartDate = DateTime.Now
+                    });
+                await context.SaveChangesAsync();
+
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
+                {
+                    TimeSpent = 30,
+                    EndQuiz = false
+                });
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.Success, result.Result);
+            Assert.AreEqual(QuizAttemptStatus.Incomplete, result.Attempt.Status);
+            Assert.AreEqual(30, result.Attempt.TimeSpent);
         }
     }
 }

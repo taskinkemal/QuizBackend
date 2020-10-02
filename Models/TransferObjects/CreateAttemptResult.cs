@@ -1,23 +1,25 @@
-﻿namespace Models.DbModels
+﻿namespace Models.TransferObjects
 {
     /// <summary>
     /// 
     /// </summary>
-    public class Answer
+    public enum CreateAttemptResult
     {
         /// <summary>
         /// 
         /// </summary>
-        public int AttemptId { get; set; }
-
+        Success,
         /// <summary>
         /// 
         /// </summary>
-        public int QuestionId { get; set; }
-
+        NotAuthorized,
         /// <summary>
         /// 
         /// </summary>
-        public int OptionId { get; set; }
+        DateError,
+        /// <summary>
+        /// 
+        /// </summary>
+        NotRepeatable
     }
 }

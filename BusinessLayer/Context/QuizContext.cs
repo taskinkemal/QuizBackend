@@ -40,7 +40,7 @@ namespace BusinessLayer.Context
             modelBuilder.Entity<Quiz>()
                 .HasOne<QuizIdentity>()
                 .WithMany()
-                .HasForeignKey(p => p.QuizId);
+                .HasForeignKey(p => p.QuizIdentityId);
 
             modelBuilder.Entity<QuizAttempt>()
                 .HasKey(c => c.Id);
@@ -59,6 +59,9 @@ namespace BusinessLayer.Context
 
             modelBuilder.Entity<QuizQuestion>()
                 .HasKey(c => new { c.QuizId, c.QuestionId });
+
+            modelBuilder.Entity<Answer>()
+                .HasKey(c => new { c.AttemptId, c.QuestionId });
         }
 
         /// <summary>
@@ -115,5 +118,10 @@ namespace BusinessLayer.Context
         /// 
         /// </summary>
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DbSet<Answer> Answers { get; set; }
     }
 }

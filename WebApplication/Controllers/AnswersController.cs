@@ -14,10 +14,12 @@ namespace WebApplication.Controllers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="answer"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult<bool> Post([FromBody] Answer answer)
+        [Route("QuizAttempts/{id}")]
+        public ActionResult<bool> Post(int id, [FromBody] Models.TransferObjects.Answer answer)
         {
 
             return true;

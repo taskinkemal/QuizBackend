@@ -5,12 +5,12 @@ namespace Models.TransferObjects
     /// <summary>
     /// 
     /// </summary>
-    public class UpdateQuizAttemptResponse
+    public class CreateAttemptResponse
     {
         /// <summary>
         /// 
         /// </summary>
-        public UpdateQuizAttemptStatusResult Result { get; set; }
+        public CreateAttemptResult Result { get; set; }
 
         /// <summary>
         /// 

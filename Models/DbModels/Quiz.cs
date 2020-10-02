@@ -21,7 +21,7 @@ namespace Models.DbModels
         /// 
         /// </summary>
         [DataMember]
-        public int QuizId { get; set; }
+        public int QuizIdentityId { get; set; }
 
         /// <summary>
         /// 
@@ -81,8 +81,8 @@ namespace Models.DbModels
         /// <summary>
         /// 
         /// </summary>
-        [DataMember]
-        public int PassScore { get; set; }
+        [DataMember(IsRequired = false)]
+        public int? PassScore { get; set; }
 
         /// <summary>
         /// 

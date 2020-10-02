@@ -14,8 +14,17 @@ namespace BusinessLayer.Interfaces
         /// 
         /// </summary>
         /// <param name="userId"></param>
-        /// <param name="attempt"></param>
+        /// <param name="quizId"></param>
         /// <returns></returns>
-        Task<UpdateQuizAttemptResponse> UpdateAttempt(int userId, QuizAttempt attempt);
+        Task<CreateAttemptResponse> CreateAttempt(int userId, int quizId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="attemptId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        Task<UpdateQuizAttemptResponse> UpdateStatus(int userId, int attemptId, UpdateQuizAttemptStatus status);
     }
 }

@@ -122,7 +122,7 @@ namespace BusinessLayer.Test
 
             var userId = await userManager.InsertUserInternalAsync(CreateUserTo(0), true);
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));
-            var quizId = await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(1));
+            var quizId = (await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(1))).QuizId;
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
 
             var questionIds = new List<int>();
@@ -143,6 +143,38 @@ namespace BusinessLayer.Test
             }
 
             return (QuizId: quizId, QuestionIds: questionIds);
+        }
+
+        internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, bool assignUser)
+        {
+            return await CreateAndAssignQuizAsync(context, CreateQuiz(1), assignUser);
+        }
+
+
+        internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)
+        {
+            var logManager = Mock.Of<ILogManager>();
+            var quizManager = new QuizManager(context, logManager);
+            var userManager = GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
+
+            var userTo = CreateUserTo(0);
+            var userId = await userManager.InsertUserInternalAsync(userTo, true);
+            await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));
+            var quizInsertResult = await quizManager.InsertQuizInternalAsync(userId, quiz);
+            await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
+            if (assignUser)
+            {
+                await context.QuizAssignments.AddAsync(
+                    new QuizAssignment
+                    {
+                        QuizIdentityId = quiz.QuizIdentityId,
+                        Email = userTo.Email
+                    });
+            }
+
+            await context.SaveChangesAsync();
+
+            return (QuizId: quizInsertResult.QuizId, UserId: userId);
         }
     }
 }

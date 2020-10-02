@@ -38,7 +38,7 @@ namespace BusinessLayer.Implementations
 
             var quizes = (
                 from qi in Context.QuizIdentities
-                join q in Context.Quizes on qi.Id equals q.QuizId
+                join q in Context.Quizes on qi.Id equals q.QuizIdentityId
                 join ua in Context.QuizAssignments on qi.Id equals ua.QuizIdentityId
                 join u in Context.Users on new { F1 = ua.Email, F2 = userId } equals new { F1 = u.Email, F2 = u.Id }
                 where q.Status == QuizStatus.Current
@@ -53,7 +53,7 @@ namespace BusinessLayer.Implementations
             return await Task.FromResult(quizes);
         }
 
-        internal async Task<int> InsertQuizInternalAsync(int userId, Quiz quiz)
+        internal async Task<(int QuizIdentityId, int QuizId)> InsertQuizInternalAsync(int userId, Quiz quiz)
         {
             var quizIdentity = await Context.QuizIdentities.AddAsync(
                 new QuizIdentity
@@ -63,7 +63,7 @@ namespace BusinessLayer.Implementations
 
             await Context.SaveChangesAsync();
 
-            quiz.QuizId = quizIdentity.Entity.Id;
+            quiz.QuizIdentityId = quizIdentity.Entity.Id;
             quiz.Version = 1;
             quiz.Status = QuizStatus.Current;
 
@@ -71,7 +71,7 @@ namespace BusinessLayer.Implementations
 
             await Context.SaveChangesAsync();
 
-            return insertedQuiz.Entity.Id;
+            return (QuizIdentityId: quiz.QuizIdentityId, QuizId: insertedQuiz.Entity.Id);
         }
     }
 }

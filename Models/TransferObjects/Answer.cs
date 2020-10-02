@@ -1,4 +1,6 @@
-﻿namespace Models.DbModels
+﻿using System.Collections.Generic;
+
+namespace Models.TransferObjects
 {
     /// <summary>
     /// 
@@ -8,7 +10,7 @@
         /// <summary>
         /// 
         /// </summary>
-        public int AttemptId { get; set; }
+        public int TimeSpent { get; set; }
 
         /// <summary>
         /// 
@@ -18,6 +20,6 @@
         /// <summary>
         /// 
         /// </summary>
-        public int OptionId { get; set; }
+        public IEnumerable<int> Options { get; set; }
     }
 }
