@@ -127,6 +127,7 @@ namespace WebCommon.Test
         [DataRow(false, typeof(TestGenericClass<bool>))]
         [DataRow(false, typeof(TestGenericClass<PasswordCriteria>))]
         [DataRow(true, typeof(Nullable<bool>))]
+        [DataRow(true, null)]
         public void IsSimpleType(bool expected, Type type)
         {
             var actual = ControllerHelper.IsSimpleType(type);

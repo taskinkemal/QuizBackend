@@ -46,6 +46,11 @@ namespace WebCommon.BaseControllers
 
         internal static bool IsSimpleType(Type type)
         {
+            if (Convert.GetTypeCode(type) != TypeCode.Object)
+            {
+                return true;
+            }
+
             if (type.IsPrimitive || type.IsEnum)
             {
                 return true;
@@ -61,11 +66,6 @@ namespace WebCommon.BaseControllers
                 typeof(TimeSpan),
                 typeof(Guid)
             }.Contains(type))
-            {
-                return true;
-            }
-
-            if (Convert.GetTypeCode(type) != TypeCode.Object)
             {
                 return true;
             }
