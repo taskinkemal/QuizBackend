@@ -1,3 +1,5 @@
+![Build Status](https://github.com/taskinkemal/QuizBackend/workflows/.NET%20Core/badge.svg?branch=github-actions) [![Coverage Status](https://coveralls.io/repos/github/mikuam/TicketStore/badge.svg?branch=github-actions)](https://coveralls.io/github/mikuam/TicketStore?branch=github-actions)
+
 # QuizBackend
 Quiz Backend
 
