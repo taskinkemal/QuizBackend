@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
@@ -14,13 +15,17 @@ namespace BusinessLayer.Implementations
     /// </summary>
     public class QuizAttemptManager : ManagerBase, IQuizAttemptManager
     {
+        private readonly IQuestionManager questionManager;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="questionManager"></param>
         /// <param name="logManager"></param>
-        public QuizAttemptManager(QuizContext context, ILogManager logManager) : base(context, logManager)
+        public QuizAttemptManager(QuizContext context, IQuestionManager questionManager, ILogManager logManager) : base(context, logManager)
         {
+            this.questionManager = questionManager;
         }
 
         /// <summary>
@@ -62,7 +67,7 @@ namespace BusinessLayer.Implementations
                 };
             }
 
-            var attempts = Context.QuizAttempts.Where(a => a.QuizId == quizId && a.UserId == userId);
+            var attempts = Context.QuizAttempts.Where(a => a.QuizId == quizId && a.UserId == userId).ToList();
 
             if (attempts.Any())
             {
@@ -78,8 +83,6 @@ namespace BusinessLayer.Implementations
                 {
                     await FinishQuizAsync(a, quiz.PassScore, a.TimeSpent);
                 }
-
-                await Context.SaveChangesAsync();
             }
 
             var newAttempt = await InsertAttemptInternalAsync(userId, quizId);
@@ -113,22 +116,9 @@ namespace BusinessLayer.Implementations
             var quiz = await Context.Quizes.FindAsync(attempt.QuizId);
             // no need to check for null, because otherwise the attempt cannot be there.
 
-            var isAssigned = (from qas in Context.QuizAssignments
-                              join u in Context.Users on qas.Email equals u.Email
-                              where qas.QuizIdentityId == quiz.QuizIdentityId && u.Id == userId
-                              select 0).Any();
-
-            if (!isAssigned)
-            {
-                return new UpdateQuizAttemptResponse
-                {
-                    Result = UpdateQuizAttemptStatusResult.NotAuthorized
-                };
-            }
-
             if (quiz.TimeConstraint && status.TimeSpent >= quiz.TimeLimitInSeconds)
             {
-                attempt = await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
+                await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
 
                 return new UpdateQuizAttemptResponse
                 {
@@ -139,7 +129,7 @@ namespace BusinessLayer.Implementations
 
             if (quiz.AvailableTo != null && quiz.AvailableTo < DateTime.Now)
             {
-                attempt = await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
+                await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
 
                 return new UpdateQuizAttemptResponse
                 {
@@ -158,7 +148,7 @@ namespace BusinessLayer.Implementations
 
             if (status.EndQuiz)
             {
-                attempt = await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
+                await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
 
                 return new UpdateQuizAttemptResponse
                 {
@@ -178,18 +168,14 @@ namespace BusinessLayer.Implementations
             };
         }
 
-        internal async Task<QuizAttempt> FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
+        internal async Task FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent)
         {
             if (attempt.Status != QuizAttemptStatus.Incomplete)
             {
-                return attempt;
+                return;
             }
 
-            var questions = (from qq in Context.QuizQuestions
-                             join q in Context.Questions on qq.QuestionId equals q.Id
-                             where qq.QuizId == attempt.QuizId
-                             select q
-                            ).ToList();
+            var questions = (await questionManager.GetQuizQuestions(attempt.QuizId)).ToList();
 
             var options = (from qo in Context.QuestionOptions
                            join qq in Context.QuizQuestions on qo.QuestionId equals qq.QuestionId
@@ -198,9 +184,25 @@ namespace BusinessLayer.Implementations
                            join a in Context.Answers on new { AttemptId = attempt.Id, QuestionId = q.Id, OptionId = q.Id } equals new { a.AttemptId, a.QuestionId, a.OptionId } into ad
                            from a in ad.DefaultIfEmpty()
                            where qq.QuizId == attempt.QuizId
-                           select new { qo.QuestionId, q.Level, o.Id, o.IsCorrect, IsMarked = a != null ? (int?)a.OptionId : null }
+                           select new QuestionAnswer { QuestionId = qo.QuestionId, IsCorrect = o.IsCorrect, IsMarked = a != null }
                           ).ToList();
 
+            var evaluationResult = EvaluateQuiz(questions, options);
+
+            attempt.Score = evaluationResult.Score;
+            attempt.Correct = evaluationResult.CorrectCount;
+            attempt.Incorrect = evaluationResult.IncorrectCount;
+            attempt.Status = EvaluateStatus(evaluationResult.Score, passScore);
+            attempt.EndDate = DateTime.Now;
+            attempt.TimeSpent = timeSpent;
+
+            Context.QuizAttempts.Update(attempt);
+
+            await Context.SaveChangesAsync();
+        }
+
+        internal static (int CorrectCount, int IncorrectCount, decimal Score) EvaluateQuiz(List<Question> questions, List<QuestionAnswer> options)
+        {
             var totalScore = questions.Sum(q => q.Level);
             var userScore = 0;
             var correctCount = 0;
@@ -208,11 +210,11 @@ namespace BusinessLayer.Implementations
 
             foreach (var question in questions)
             {
-                var qOptions = options.Where(o => o.QuestionId == question.Id);
+                var qOptions = options.Where(o => o.QuestionId == question.Id).ToList();
 
                 var cntCorrect = qOptions.Count(o => o.IsCorrect);
-                var cntUserCorrect = qOptions.Count(o => o.IsCorrect && o.IsMarked.HasValue);
-                var cntUserIncorrect = qOptions.Count(o => !o.IsCorrect && o.IsMarked.HasValue);
+                var cntUserCorrect = qOptions.Count(o => o.IsCorrect && o.IsMarked);
+                var cntUserIncorrect = qOptions.Count(o => !o.IsCorrect && o.IsMarked);
 
                 if (cntCorrect == cntUserCorrect && cntUserIncorrect == 0)
                 {
@@ -225,22 +227,30 @@ namespace BusinessLayer.Implementations
                 }
             }
 
-            var score = totalScore == 0 ? 0 : Convert.ToDecimal(Math.Round(userScore * 100.0 / totalScore, 2));
+            var score = RoundScore(userScore, totalScore);
+
+            return (correctCount, incorrectCount, score);
+        }
+
+        internal static decimal RoundScore(int rawScore, int totalScore)
+        {
+            var score = totalScore == 0 ? 0 : Convert.ToDecimal(Math.Round(rawScore * 100.0 / totalScore, 2));
             if (score > 100)
             {
                 score = 100;
             }
 
-            var status = passScore.HasValue ? score >= passScore ? QuizAttemptStatus.Passed : QuizAttemptStatus.Failed : QuizAttemptStatus.Completed;
+            return score;
+        }
 
-            attempt.Score = score;
-            attempt.Status = status;
-            attempt.EndDate = DateTime.Now;
-            attempt.TimeSpent = timeSpent;
+        internal static QuizAttemptStatus EvaluateStatus(decimal score, int? passScore)
+        {
+            if (!passScore.HasValue)
+            {
+                return QuizAttemptStatus.Completed;
+            }
 
-            Context.Update(attempt);
-
-            return await Task.FromResult(attempt);
+            return score >= passScore ? QuizAttemptStatus.Passed : QuizAttemptStatus.Failed;
         }
 
         internal async Task<QuizAttempt> InsertAttemptInternalAsync(int userId, int quizId)
@@ -258,5 +268,12 @@ namespace BusinessLayer.Implementations
 
             return attempt.Entity;
         }
+    }
+
+    internal class QuestionAnswer
+    {
+        public int QuestionId { get; set; }
+        public bool IsCorrect { get; set; }
+        public bool IsMarked { get; set; }
     }
 }

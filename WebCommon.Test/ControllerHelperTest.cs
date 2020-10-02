@@ -111,5 +111,30 @@ namespace WebCommon.Test
             Assert.AreEqual(code, (result.Value as HttpErrorMessage).Code);
             Assert.AreEqual((int)status, result.StatusCode);
         }
+
+        [DataTestMethod]
+        [DataRow(true, typeof(bool))]
+        [DataRow(true, typeof(Enum))]
+        [DataRow(true, typeof(string))]
+        [DataRow(true, typeof(decimal))]
+        [DataRow(true, typeof(DateTime))]
+        [DataRow(true, typeof(DateTimeOffset))]
+        [DataRow(true, typeof(TimeSpan))]
+        [DataRow(true, typeof(Guid))]
+        [DataRow(true, typeof(DateTimeOffset))]
+        [DataRow(true, typeof(int))]
+        [DataRow(false, typeof(DBNull))]
+        [DataRow(false, typeof(TestGenericClass<bool>))]
+        [DataRow(false, typeof(TestGenericClass<PasswordCriteria>))]
+        [DataRow(true, typeof(Nullable<bool>))]
+        public void IsSimpleType(bool expected, Type type)
+        {
+            var actual = ControllerHelper.IsSimpleType(type);
+            Assert.AreEqual(expected, actual);
+        }
+
+        class TestGenericClass<T>
+        {
+        }
     }
 }

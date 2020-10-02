@@ -145,36 +145,42 @@ namespace BusinessLayer.Test
             return (QuizId: quizId, QuestionIds: questionIds);
         }
 
-        internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, bool assignUser)
-        {
-            return await CreateAndAssignQuizAsync(context, CreateQuiz(1), assignUser);
-        }
-
-
         internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)
         {
             var logManager = Mock.Of<ILogManager>();
             var quizManager = new QuizManager(context, logManager);
-            var userManager = GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
 
-            var userTo = CreateUserTo(0);
-            var userId = await userManager.InsertUserInternalAsync(userTo, true);
+            var userId = 0;
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));
             var quizInsertResult = await quizManager.InsertQuizInternalAsync(userId, quiz);
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
             if (assignUser)
             {
-                await context.QuizAssignments.AddAsync(
-                    new QuizAssignment
-                    {
-                        QuizIdentityId = quiz.QuizIdentityId,
-                        Email = userTo.Email
-                    });
+                userId = await AssignQuizAsync(context, quiz.QuizIdentityId);
             }
 
             await context.SaveChangesAsync();
 
             return (QuizId: quizInsertResult.QuizId, UserId: userId);
+        }
+
+        internal static async Task<int> AssignQuizAsync(QuizContext context, int quizIdentityId)
+        {
+            var logManager = Mock.Of<ILogManager>();
+            var userManager = GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
+
+            var userTo = CreateUserTo(0);
+            var userId = await userManager.InsertUserInternalAsync(userTo, true);
+            await context.QuizAssignments.AddAsync(
+                new QuizAssignment
+                {
+                    QuizIdentityId = quizIdentityId,
+                    Email = userTo.Email
+                });
+
+            await context.SaveChangesAsync();
+
+            return userId;
         }
     }
 }

@@ -34,6 +34,11 @@ namespace BusinessLayer.Context
             modelBuilder.Entity<QuizIdentity>()
                 .HasKey(c => c.Id);
 
+            modelBuilder.Entity<QuizIdentity>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(p => p.OwnerId);
+
             modelBuilder.Entity<Quiz>()
                 .HasKey(c => c.Id);
 
@@ -45,8 +50,23 @@ namespace BusinessLayer.Context
             modelBuilder.Entity<QuizAttempt>()
                 .HasKey(c => c.Id);
 
+            modelBuilder.Entity<QuizAttempt>()
+                .HasOne<Quiz>()
+                .WithMany()
+                .HasForeignKey(p => p.QuizId);
+
+            modelBuilder.Entity<QuizAttempt>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
+
             modelBuilder.Entity<QuizAssignment>()
                 .HasKey(c => new { c.QuizIdentityId, c.Email });
+
+            modelBuilder.Entity<QuizAssignment>()
+                .HasOne<QuizIdentity>()
+                .WithMany()
+                .HasForeignKey(p => p.QuizIdentityId);
 
             modelBuilder.Entity<Question>()
                 .HasKey(c => c.Id);
@@ -57,11 +77,46 @@ namespace BusinessLayer.Context
             modelBuilder.Entity<QuestionOption>()
                 .HasKey(c => new { c.QuestionId, c.OptionId });
 
+            modelBuilder.Entity<QuestionOption>()
+                .HasOne<Question>()
+                .WithMany()
+                .HasForeignKey(p => p.QuestionId);
+
+            modelBuilder.Entity<QuestionOption>()
+                .HasOne<Option>()
+                .WithMany()
+                .HasForeignKey(p => p.OptionId);
+
             modelBuilder.Entity<QuizQuestion>()
                 .HasKey(c => new { c.QuizId, c.QuestionId });
 
+            modelBuilder.Entity<QuizQuestion>()
+                .HasOne<Quiz>()
+                .WithMany()
+                .HasForeignKey(p => p.QuizId);
+
+            modelBuilder.Entity<QuizQuestion>()
+                .HasOne<Question>()
+                .WithMany()
+                .HasForeignKey(p => p.QuestionId);
+
             modelBuilder.Entity<Answer>()
                 .HasKey(c => new { c.AttemptId, c.QuestionId });
+
+            modelBuilder.Entity<Answer>()
+                .HasOne<QuizAttempt>()
+                .WithMany()
+                .HasForeignKey(p => p.AttemptId);
+
+            modelBuilder.Entity<Answer>()
+                .HasOne<Question>()
+                .WithMany()
+                .HasForeignKey(p => p.QuestionId);
+
+            modelBuilder.Entity<Answer>()
+                .HasOne<Option>()
+                .WithMany()
+                .HasForeignKey(p => p.OptionId);
         }
 
         /// <summary>

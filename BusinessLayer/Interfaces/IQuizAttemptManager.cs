@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Common.Interfaces;
-using Models.DbModels;
 using Models.TransferObjects;
 
 namespace BusinessLayer.Interfaces

@@ -44,22 +44,39 @@ namespace WebCommon.BaseControllers
             };
         }
 
-        private static bool IsSimpleType(Type type)
+        internal static bool IsSimpleType(Type type)
         {
-            return
-                type.IsPrimitive || type.IsEnum ||
-                new[] {
-                    typeof(Enum),
-                    typeof(string),
-                    typeof(decimal),
-                    typeof(DateTime),
-                    typeof(DateTimeOffset),
-                    typeof(TimeSpan),
-                    typeof(Guid)
-                }.Contains(type) ||
-                Convert.GetTypeCode(type) != TypeCode.Object ||
-                (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]))
-                ;
+            if (type.IsPrimitive || type.IsEnum)
+            {
+                return true;
+            }
+
+            if (new[]
+            {
+                typeof(Enum),
+                typeof(string),
+                typeof(decimal),
+                typeof(DateTime),
+                typeof(DateTimeOffset),
+                typeof(TimeSpan),
+                typeof(Guid)
+            }.Contains(type))
+            {
+                return true;
+            }
+
+            if (Convert.GetTypeCode(type) != TypeCode.Object)
+            {
+                return true;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                IsSimpleType(type.GetGenericArguments()[0]))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
