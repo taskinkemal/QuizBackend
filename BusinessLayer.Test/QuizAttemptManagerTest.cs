@@ -583,5 +583,32 @@ namespace BusinessLayer.Test
             Assert.AreEqual(0, answersOtherQuestion.Count);
             Assert.AreEqual(40, attempt.TimeSpent);
         }
+
+        [TestMethod]
+        public async Task InsertAnswerUnauthorized()
+        {
+            UpdateQuizAttemptStatusResult result;
+            
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var quizData = await ManagerTestHelper.CreateQuizAsync(context, 3, 5);
+                var quiz = await context.Quizes.FindAsync(quizData.QuizId);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, quiz.QuizIdentityId);
+
+                var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
+                var optionIds = quizData.OptionIds.Skip(2).Take(2).ToList();
+
+                result = await sut.InsertAnswerAsync(userId, 8,
+                    new Models.TransferObjects.Answer
+                    {
+                        QuestionId = quizData.QuestionIds[0],
+                        Options = quizData.OptionIds.Take(2),
+                        TimeSpent = 40
+                    });
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.NotAuthorized, result);
+        }
     }
 }
