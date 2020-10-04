@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Models.DbModels;
+﻿using Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
 using WebCommon.BaseControllers;
 using BusinessLayer.Interfaces;
