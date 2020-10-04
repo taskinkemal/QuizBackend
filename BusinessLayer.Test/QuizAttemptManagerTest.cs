@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
@@ -391,7 +392,6 @@ namespace BusinessLayer.Test
         {
             CreateAttemptResponse result;
 
-
             using (var context = new QuizContext(ManagerTestHelper.Options))
             {
                 var logManager = Mock.Of<ILogManager>();
@@ -402,7 +402,6 @@ namespace BusinessLayer.Test
                 var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
                 result = await sut.CreateAttempt(userId, quiz.Id);
                 await sut.FinishQuizAsync(result.Attempt, quiz.PassScore, 30);
-                
             }
 
             Assert.AreEqual(CreateAttemptResult.Success, result.Result);
@@ -514,7 +513,6 @@ namespace BusinessLayer.Test
 
             var result = QuizAttemptManager.EvaluateQuiz(questions, options);
 
-
             Assert.AreEqual(2, result.CorrectCount);
             Assert.AreEqual(1, result.IncorrectCount);
             Assert.AreEqual(53.85M, result.Score);
@@ -529,6 +527,61 @@ namespace BusinessLayer.Test
         {
             var actual = QuizAttemptManager.EvaluateStatus(userScore, passScore);
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task InsertAnswer()
+        {
+            UpdateQuizAttemptStatusResult result;
+            QuizAttempt attempt;
+            List<int> optionIds;
+            List<int> answers;
+            List<int> answersOtherQuestion;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var quizData = await ManagerTestHelper.CreateQuizAsync(context, 3, 5);
+                var quiz = await context.Quizes.FindAsync(quizData.QuizId);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, quiz.QuizIdentityId);
+
+                var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
+                var createAttemptResult = await sut.CreateAttempt(userId, quiz.Id);
+                attempt = createAttemptResult.Attempt;
+                optionIds = quizData.OptionIds.Skip(2).Take(2).ToList();
+
+                result = await sut.InsertAnswerAsync(userId, attempt.Id,
+                    new Models.TransferObjects.Answer
+                    {
+                        QuestionId = quizData.QuestionIds[0],
+                        Options = quizData.OptionIds.Take(2),
+                        TimeSpent = 40
+                    });
+
+                result = await sut.InsertAnswerAsync(userId, attempt.Id,
+                    new Models.TransferObjects.Answer
+                    {
+                        QuestionId = quizData.QuestionIds[0],
+                        Options = optionIds,
+                        TimeSpent = 40
+                    });
+
+                answers = context.Answers
+                    .Where(a => a.AttemptId == attempt.Id && a.QuestionId == quizData.QuestionIds[0])
+                    .Select(a => a.OptionId)
+                    .ToList();
+
+                answersOtherQuestion = context.Answers
+                    .Where(a => a.AttemptId == attempt.Id && a.QuestionId == quizData.QuestionIds[1])
+                    .Select(a => a.OptionId)
+                    .ToList();
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.Success, result);
+            Assert.AreEqual(0, optionIds.Except(answers).ToList().Count);
+            Assert.AreEqual(0, answers.Except(optionIds).ToList().Count);
+            Assert.AreEqual(0, answersOtherQuestion.Count);
+            Assert.AreEqual(40, attempt.TimeSpent);
         }
     }
 }

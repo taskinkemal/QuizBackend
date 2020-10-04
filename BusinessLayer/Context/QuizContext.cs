@@ -101,7 +101,7 @@ namespace BusinessLayer.Context
                 .HasForeignKey(p => p.QuestionId);
 
             modelBuilder.Entity<Answer>()
-                .HasKey(c => new { c.AttemptId, c.QuestionId });
+                .HasKey(c => new { c.AttemptId, c.QuestionId, c.OptionId });
 
             modelBuilder.Entity<Answer>()
                 .HasOne<QuizAttempt>()

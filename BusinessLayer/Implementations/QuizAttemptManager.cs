@@ -103,47 +103,13 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<UpdateQuizAttemptResponse> UpdateStatus(int userId, int attemptId, UpdateQuizAttemptStatus status)
         {
-            var attempt = await Context.QuizAttempts.FindAsync(attemptId);
+            var verifyResponse = await VerifyRequest(userId, attemptId, status.TimeSpent);
+            var attempt = verifyResponse.attempt;
+            var quiz = verifyResponse.quiz;
 
-            if (attempt == null || attempt.UserId != userId)
+            if (verifyResponse.response != null)
             {
-                return new UpdateQuizAttemptResponse
-                {
-                    Result = UpdateQuizAttemptStatusResult.NotAuthorized
-                };
-            }
-
-            var quiz = await Context.Quizes.FindAsync(attempt.QuizId);
-            // no need to check for null, because otherwise the attempt cannot be there.
-
-            if (quiz.TimeConstraint && status.TimeSpent >= quiz.TimeLimitInSeconds)
-            {
-                await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
-
-                return new UpdateQuizAttemptResponse
-                {
-                    Result = UpdateQuizAttemptStatusResult.TimeUp,
-                    Attempt = attempt
-                };
-            }
-
-            if (quiz.AvailableTo != null && quiz.AvailableTo < DateTime.Now)
-            {
-                await FinishQuizAsync(attempt, quiz.PassScore, status.TimeSpent);
-
-                return new UpdateQuizAttemptResponse
-                {
-                    Result = UpdateQuizAttemptStatusResult.DateError,
-                    Attempt = attempt
-                };
-            }
-
-            if (attempt.Status != QuizAttemptStatus.Incomplete)
-            {
-                return new UpdateQuizAttemptResponse
-                {
-                    Result = UpdateQuizAttemptStatusResult.StatusError
-                };
+                return verifyResponse.response;
             }
 
             if (status.EndQuiz)
@@ -208,6 +174,44 @@ namespace BusinessLayer.Implementations
             await Context.SaveChangesAsync();
 
             return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="attemptId"></param>
+        /// <param name="answer"></param>
+        /// <returns></returns>
+        public async Task<UpdateQuizAttemptStatusResult> InsertAnswerAsync(int userId, int attemptId, Models.TransferObjects.Answer answer)
+        {
+            var verifyResponse = await VerifyRequest(userId, attemptId, answer.TimeSpent);
+            var attempt = verifyResponse.attempt;
+            
+            if (verifyResponse.response != null)
+            {
+                return verifyResponse.response.Result;
+            }
+
+            Context.Answers.RemoveRange(Context.Answers.Where(a => a.AttemptId == attemptId && a.QuestionId == answer.QuestionId));
+
+            await Context.SaveChangesAsync();
+
+            foreach (var optionId in answer.Options)
+            {
+                await Context.Answers.AddAsync(new Models.DbModels.Answer
+                {
+                    AttemptId = attemptId,
+                    QuestionId = answer.QuestionId,
+                    OptionId = optionId
+                });
+            }
+
+            attempt.TimeSpent = answer.TimeSpent;
+
+            await Context.SaveChangesAsync();
+
+            return UpdateQuizAttemptStatusResult.Success;
         }
 
         internal static (int CorrectCount, int IncorrectCount, decimal Score) EvaluateQuiz(List<Question> questions, List<QuestionAnswer> options)
@@ -276,6 +280,63 @@ namespace BusinessLayer.Implementations
             await Context.SaveChangesAsync();
 
             return attempt.Entity;
+        }
+
+        private async Task<(QuizAttempt attempt, Quiz quiz, UpdateQuizAttemptResponse response)>
+            VerifyRequest(int userId, int attemptId, int timeSpent)
+        {
+            var attempt = await Context.QuizAttempts.FindAsync(attemptId);
+
+            if (attempt == null || attempt.UserId != userId)
+            {
+                var response = new UpdateQuizAttemptResponse
+                {
+                    Result = UpdateQuizAttemptStatusResult.NotAuthorized
+                };
+
+                return (attempt, null, response);
+            }
+
+            var quiz = await Context.Quizes.FindAsync(attempt.QuizId);
+            // no need to check for null, because otherwise the attempt cannot be there.
+
+            if (quiz.TimeConstraint && timeSpent >= quiz.TimeLimitInSeconds)
+            {
+                await FinishQuizAsync(attempt, quiz.PassScore, timeSpent);
+
+                var response = new UpdateQuizAttemptResponse
+                {
+                    Result = UpdateQuizAttemptStatusResult.TimeUp,
+                    Attempt = attempt
+                };
+
+                return (attempt, quiz, response);
+            }
+
+            if (quiz.AvailableTo != null && quiz.AvailableTo < DateTime.Now)
+            {
+                await FinishQuizAsync(attempt, quiz.PassScore, timeSpent);
+
+                var response = new UpdateQuizAttemptResponse
+                {
+                    Result = UpdateQuizAttemptStatusResult.DateError,
+                    Attempt = attempt
+                };
+
+                return (attempt, quiz, response);
+            }
+
+            if (attempt.Status != QuizAttemptStatus.Incomplete)
+            {
+                var response = new UpdateQuizAttemptResponse
+                {
+                    Result = UpdateQuizAttemptStatusResult.StatusError
+                };
+
+                return (attempt, quiz, response);
+            }
+
+            return (attempt, quiz, null);
         }
     }
 

@@ -112,7 +112,7 @@ namespace BusinessLayer.Test
             };
         }
 
-        internal static async Task<(int QuizId, List<int> QuestionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
+        internal static async Task<(int QuizId, List<int> QuestionIds, List<int> OptionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
         {
             var logManager = Mock.Of<ILogManager>();
             var optionManager = new OptionManager(context, logManager);
@@ -126,6 +126,7 @@ namespace BusinessLayer.Test
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
 
             var questionIds = new List<int>();
+            var optionIds = new List<int>();
 
             for (var i = 0; i < questionCount; i++)
             {
@@ -138,11 +139,16 @@ namespace BusinessLayer.Test
                 {
                     var optionId = await optionManager.InsertOptionInternalAsync(CreateOption(j, j == 1));
 
+                    if (i == 0)
+                    {
+                        optionIds.Add(optionId);
+                    }
+
                     await optionManager.AssignOptionInternalAsync(questionId, optionId);
                 }
             }
 
-            return (QuizId: quizId, QuestionIds: questionIds);
+            return (QuizId: quizId, QuestionIds: questionIds, OptionIds: optionIds);
         }
 
         internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)

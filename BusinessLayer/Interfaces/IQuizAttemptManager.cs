@@ -35,5 +35,14 @@ namespace BusinessLayer.Interfaces
         /// <param name="timeSpent"></param>
         /// <returns></returns>
         Task<bool> FinishQuizAsync(QuizAttempt attempt, int? passScore, int timeSpent);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="attemptId"></param>
+        /// <param name="answer"></param>
+        /// <returns></returns>
+        Task<UpdateQuizAttemptStatusResult> InsertAnswerAsync(int userId, int attemptId, Models.TransferObjects.Answer answer);
     }
 }
