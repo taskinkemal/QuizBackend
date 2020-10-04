@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using System.Net;
 using Common;
+using Models.TransferObjects;
 
 namespace WebApplication.Controllers
 {
@@ -36,7 +37,7 @@ namespace WebApplication.Controllers
         /// <response code="409">Quiz attempt status is not acceptable.</response>
         /// <response code="406">Quiz end date has passed.</response>
         /// <response code="417">Time up.</response>
-        [ProducesResponseType(typeof(QuizAttempt), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(UpdateQuizAttemptStatusResult), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Conflict)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.ExpectationFailed)]
@@ -48,10 +49,10 @@ namespace WebApplication.Controllers
             var result = await quizAttemptManager.InsertAnswerAsync(Token.UserId, id, answer);
 
             return
-                result == Models.TransferObjects.UpdateQuizAttemptStatusResult.Success ? ControllerHelper.CreateResponse(result) :
-                result == Models.TransferObjects.UpdateQuizAttemptStatusResult.NotAuthorized ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized") :
-                result == Models.TransferObjects.UpdateQuizAttemptStatusResult.StatusError ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError") :
-                result == Models.TransferObjects.UpdateQuizAttemptStatusResult.TimeUp ? ControllerHelper.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "TimeUp") :
+                result == UpdateQuizAttemptStatusResult.Success ? ControllerHelper.CreateResponse(result) :
+                result == UpdateQuizAttemptStatusResult.NotAuthorized ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized") :
+                result == UpdateQuizAttemptStatusResult.StatusError ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError") :
+                result == UpdateQuizAttemptStatusResult.TimeUp ? ControllerHelper.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "TimeUp") :
                     ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "DateError");
         }
     }
