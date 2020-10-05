@@ -61,10 +61,12 @@ namespace WebApplication.Controllers
         /// <response code="401">User is not authorized to update the quiz attempt.</response>
         /// <response code="409">Quiz attempt status is not acceptable.</response>
         /// <response code="406">Quiz end date has passed.</response>
+        /// <response code="417">Time up.</response>
         [ProducesResponseType(typeof(QuizAttempt), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Conflict)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.ExpectationFailed)]
         [HttpPost]
         [Route("QuizAttempts/Status/{id}")]
         public async Task<JsonResult> Post(int id, [FromBody] UpdateQuizAttemptStatus data)
@@ -75,6 +77,7 @@ namespace WebApplication.Controllers
                 result.Result == UpdateQuizAttemptStatusResult.Success ? ControllerHelper.CreateResponse(result.Attempt) :
                 result.Result == UpdateQuizAttemptStatusResult.NotAuthorized ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized") :
                 result.Result == UpdateQuizAttemptStatusResult.StatusError ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError") :
+                result.Result == UpdateQuizAttemptStatusResult.TimeUp ? ControllerHelper.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "TimeUp") :
                     ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "DateError");
         }
     }
