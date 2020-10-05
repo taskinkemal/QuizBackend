@@ -65,5 +65,17 @@ namespace Common.Test
 
             Assert.AreEqual(50, list.Distinct().Count());
         }
+
+        [TestMethod]
+        [DataRow(false, new byte[] { 1, 2 }, new byte[] { 1, 2, 3 })]
+        [DataRow(false, null, null)]
+        [DataRow(false, null, new byte[] { 1, 2, 3 })]
+        [DataRow(false, new byte[] { 1, 2, 3 }, null)]
+        public void CompareByteArraysNull(bool expected, byte[] arr1, byte[] arr2)
+        {
+            var actual = AuthenticationHelper.CompareByteArrays(arr1, arr2);
+
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

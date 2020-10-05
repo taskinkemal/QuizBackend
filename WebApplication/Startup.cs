@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using BusinessLayer.Context;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
@@ -67,8 +66,6 @@ namespace WebApplication
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            ConfigureIIS(services);
-
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 StartupHelper.SetNewtonsoftSerializerSettings(options.SerializerSettings);
@@ -109,25 +106,6 @@ namespace WebApplication
             });
 
             ConfigureAppSwagger(app);
-        }
-
-        private static void ConfigureIIS(IServiceCollection services)
-        {
-            services.Configure<IISServerOptions>(options =>
-            {
-                // The Newtonsoft.json is not working without allowing synchronous IO.
-                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
-                // https://github.com/dotnet/aspnetcore/issues/8302
-                options.AllowSynchronousIO = true;
-            });
-
-            services.Configure<KestrelServerOptions>(options =>
-            {
-                // The Newtonsoft.json is not working without allowing synchronous IO.
-                // And at the moment we cannot switch to System.Text.Json because the GraphQl libraries are still using Newtonsoft.
-                // https://github.com/dotnet/aspnetcore/issues/8302
-                options.AllowSynchronousIO = true;
-            });
         }
 
         private static void ConfigureAppSwagger(IApplicationBuilder app)
