@@ -112,6 +112,7 @@ namespace Models.DbModels
         /// 
         /// </summary>
         [DataMember(IsRequired = false)]
+        [NotMapped]
         public QuizAttempt LastAttempt { get; set; }
     }
 }
