@@ -93,7 +93,7 @@ namespace WebApplication.Test
 
             var sut = new PasswordController(userManager.Object);
 
-            sut.Token = new Models.TransferObjects.AuthToken
+            sut.Token = new AuthToken
             {
                 Token = "token",
                 UserId = userId,

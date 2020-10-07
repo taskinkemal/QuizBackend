@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,7 +14,12 @@ namespace WebApplication.Test
         [TestMethod]
         public async Task Post()
         {
-            var response = new Models.TransferObjects.AuthToken();
+            var validUntil = DateTime.Now.AddYears(1);
+
+            var response = new Models.TransferObjects.AuthToken
+            {
+                ValidUntil = validUntil
+            };
             var authManager = new Mock<IAuthManager>();
             authManager.Setup(c => c.GenerateTokenAsync(It.IsAny<Models.TransferObjects.TokenRequest>()))
                 .Returns<Models.TransferObjects.TokenRequest>(r => Task.FromResult(response));
@@ -25,6 +31,7 @@ namespace WebApplication.Test
             var resultObject = (Models.TransferObjects.AuthToken)result.Value;
 
             Assert.AreSame(response, resultObject);
+            Assert.AreEqual(validUntil, resultObject.ValidUntil);
         }
 
         [TestMethod]

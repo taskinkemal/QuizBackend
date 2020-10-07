@@ -10,17 +10,17 @@ namespace Models.TransferObjects
         /// <summary>
         /// Minimum length required.
         /// </summary>
-        public int MinimumLength { get; set; } = 6;
+        public int MinimumLength { get; } = 6;
 
         /// <summary>
         /// Minimum alphabetic characters required.
         /// </summary>
-        public int MinimumAlphabetic { get; set; } = 1;
+        public int MinimumAlphabetic { get; } = 1;
 
         /// <summary>
         /// Minimum numeric characters required.
         /// </summary>
-        public int MinimumNumeric { get; set; } = 1;
+        public int MinimumNumeric { get; } = 1;
 
         /// <summary>
         /// 

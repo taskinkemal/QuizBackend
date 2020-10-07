@@ -48,10 +48,8 @@ namespace WebApplication.Controllers
                     return ControllerHelper.CreateResponse(result.Value);
                 case InsertUserResponse.EmailExists:
                     return ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "EmailExists");
-                case InsertUserResponse.PasswordCriteriaNotSatisfied:
+                default: // case InsertUserResponse.PasswordCriteriaNotSatisfied:
                     return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "PasswordCriteriaNotSatisfied");
-                default:
-                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "SystemError");
             }
         }
 
