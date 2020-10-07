@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
@@ -52,20 +50,6 @@ namespace BusinessLayer.Test
 
             Assert.IsNotNull(options);
             Assert.AreEqual(0, options.Count);
-        }
-
-        [TestMethod]
-        public async Task InsertOptionNull()
-        {
-            int result;
-            using (var context = new QuizContext(ManagerTestHelper.Options))
-            {
-                var logManager = Mock.Of<ILogManager>();
-                var sut = new OptionManager(context, logManager);
-                result = await sut.InsertOptionInternalAsync(new Option());
-            }
-
-            Assert.AreEqual(1, result);
         }
     }
 }
