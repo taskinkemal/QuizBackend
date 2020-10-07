@@ -85,7 +85,28 @@ namespace WebApplication
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            ConfigureInternal(app, env.IsDevelopment(), app =>
+            {
+                app.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        "default",
+                        "api/{controller}/{id?}");
+                });
+
+                return 0;
+            });
+        }
+
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="isDevelopment"></param>
+        /// <param name="setRouting"></param>
+        public void ConfigureInternal(IApplicationBuilder app, bool isDevelopment, Func<IApplicationBuilder, int> setRouting)
+        {
+            if (isDevelopment)
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -98,12 +119,7 @@ namespace WebApplication
 
             app.UseCors("DefaultPolicy");
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    "default",
-                    "api/{controller}/{id?}");
-            });
+            setRouting(app);
 
             ConfigureAppSwagger(app);
         }

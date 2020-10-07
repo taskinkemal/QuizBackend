@@ -6,46 +6,17 @@ namespace Models.Test
     [TestClass]
     public class PasswordCriteriaTest
     {
-        [TestMethod]
-        public void PasswordCriteriaLengthFalse()
+        [DataTestMethod]
+        [DataRow(false, "test1", DisplayName = "LengthNotSatisfied")]
+        [DataRow(true, "test11", DisplayName = "Satisfied")]
+        [DataRow(false, "123456", DisplayName = "LettersNotSatisfied")]
+        [DataRow(false, "testtest", DisplayName = "NumeralsNotSatisfied")]
+        [DataRow(false, null, DisplayName = "PasswordIsNull")]
+        public void PasswordCriteriaIsValid(bool expected, string password)
         {
-            const string password = "test1";
-
             var result = PasswordCriteria.IsValid(password);
 
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void PasswordCriteriaTrue()
-        {
-            const string password = "test11";
-
-            var result = PasswordCriteria.IsValid(password);
-
-            Assert.IsTrue(result);
-        }
-
-
-        [TestMethod]
-        public void PasswordCriteriaLetterFalse()
-        {
-            const string password = "123456";
-
-            var result = PasswordCriteria.IsValid(password);
-
-            Assert.IsFalse(result);
-        }
-
-
-        [TestMethod]
-        public void PasswordCriteriaNumericFalse()
-        {
-            const string password = "testtest";
-
-            var result = PasswordCriteria.IsValid(password);
-
-            Assert.IsFalse(result);
+            Assert.AreEqual(expected, result);
         }
     }
 }
