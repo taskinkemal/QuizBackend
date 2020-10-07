@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Implementations;
@@ -54,7 +55,6 @@ namespace BusinessLayer.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public async Task InsertOptionNull()
         {
             int result;
@@ -62,10 +62,10 @@ namespace BusinessLayer.Test
             {
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new OptionManager(context, logManager);
-                result = await sut.InsertOptionInternalAsync(null);
+                result = await sut.InsertOptionInternalAsync(new Option());
             }
 
-            Assert.AreEqual(0, result);
+            Assert.AreEqual(1, result);
         }
     }
 }

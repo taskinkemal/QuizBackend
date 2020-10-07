@@ -5,6 +5,7 @@ using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common.Interfaces;
 using Models.DbModels;
+using System.Threading;
 
 namespace BusinessLayer.Implementations
 {
@@ -42,7 +43,7 @@ namespace BusinessLayer.Implementations
 
         internal async Task<int> InsertOptionInternalAsync(Option option)
         {
-            var insertedOption = await Context.Options.AddAsync(option);
+            var insertedOption = await Context.Options.AddAsync(option, new CancellationToken());
 
             await Context.SaveChangesAsync();
 
