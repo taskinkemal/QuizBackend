@@ -406,6 +406,7 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(CreateAttemptResult.Success, result.Result);
             Assert.AreEqual(QuizAttemptStatus.Completed, result.Attempt.Status);
+            Assert.IsNotNull(result.Attempt.EndDate);
         }
 
         [DataTestMethod]
