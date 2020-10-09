@@ -25,7 +25,7 @@ test-results/
 Icon
 
 # dev json
-appsettings.Development.json
+WebApplication/appsettings.Development.json
 
 # Thumbnails
 ._*
