@@ -65,5 +65,54 @@ namespace Models.Test
 
             Assert.AreEqual(expected, quiz.CanStart);
         }
+
+        [TestMethod]
+        public void CanResumeAttemptIsNull()
+        {
+            var quiz = new Quiz();
+
+            Assert.IsFalse(quiz.CanResume);
+        }
+
+        [DataTestMethod]
+        [DataRow(true, QuizAttemptStatus.Incomplete)]
+        [DataRow(false, QuizAttemptStatus.Completed)]
+        public void CanResumeAttempt(bool expected, QuizAttemptStatus status)
+        {
+            var quiz = new Quiz
+            {
+                LastAttempt = new QuizAttempt
+                {
+                    Status = status
+                }
+            };
+
+            Assert.AreEqual(expected, quiz.CanResume);
+        }
+
+        [TestMethod]
+        public void QuizConstructor()
+        {
+            var quiz = new Quiz
+            {
+                ShuffleQuestions = true,
+                ShuffleOptions = true,
+                PassScore = 90,
+                TimeConstraint = true,
+                TimeLimitInSeconds = 600,
+                Status = QuizStatus.Inactive,
+                Title = "Quiz Title",
+                Intro = "Quiz Intro"
+            };
+
+            Assert.AreEqual(true, quiz.ShuffleQuestions);
+            Assert.AreEqual(true, quiz.ShuffleOptions);
+            Assert.AreEqual(90, quiz.PassScore);
+            Assert.AreEqual(true, quiz.TimeConstraint);
+            Assert.AreEqual(600, quiz.TimeLimitInSeconds);
+            Assert.AreEqual(QuizStatus.Inactive, quiz.Status);
+            Assert.AreEqual("Quiz Title", quiz.Title);
+            Assert.AreEqual("Quiz Intro", quiz.Intro);
+        }
     }
 }
