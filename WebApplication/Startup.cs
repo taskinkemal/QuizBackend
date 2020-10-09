@@ -75,7 +75,9 @@ namespace WebApplication
 
             ConfigureServiceSwagger(services);
 
-            Environment.SetEnvironmentVariable("BASEDIR", PlatformServices.Default.Application.ApplicationBasePath);
+            var logFolder = System.IO.Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Log") +
+                System.IO.Path.DirectorySeparatorChar;
+            Environment.SetEnvironmentVariable("LOGDIR", logFolder);
         }
 
         /// <summary>
