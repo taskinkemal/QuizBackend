@@ -1,4 +1,4 @@
-![Build Status](https://github.com/taskinkemal/QuizBackend/workflows/.NET%20Core/badge.svg?branch=master&kill_cache=2) [![Coverage Status](https://coveralls.io/repos/github/taskinkemal/QuizBackend/badge.svg?branch=master&kill_cache=2)](https://coveralls.io/github/taskinkemal/QuizBackend?branch=master)
+![Build Status](https://github.com/taskinkemal/QuizBackend/workflows/.NET%20Core/badge.svg?branch=master&kill_cache=3) [![Coverage Status](https://coveralls.io/repos/github/taskinkemal/QuizBackend/badge.svg?branch=master&kill_cache=3)](https://coveralls.io/github/taskinkemal/QuizBackend?branch=master)
 
 # QuizBackend
 Quiz Backend
