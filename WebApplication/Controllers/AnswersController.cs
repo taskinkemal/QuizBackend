@@ -43,7 +43,7 @@ namespace WebApplication.Controllers
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.ExpectationFailed)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
         [HttpPost]
-        [Route("QuizAttempts/{id}")]
+        [Route("Answers/{id}")]
         public async Task<JsonResult> Post(int id, [FromBody] Models.TransferObjects.Answer answer)
         {
             var result = await quizAttemptManager.InsertAnswerAsync(Token.UserId, id, answer);

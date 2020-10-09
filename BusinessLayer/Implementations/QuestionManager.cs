@@ -60,7 +60,7 @@ namespace BusinessLayer.Implementations
 
         internal async Task<int> InsertQuestionInternalAsync(Question question)
         {
-            var insertedQuestion= await Context.Questions.AddAsync(question);
+            var insertedQuestion = await Context.Questions.AddAsync(question);
 
             await Context.SaveChangesAsync();
 

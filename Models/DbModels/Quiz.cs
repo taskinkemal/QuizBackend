@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
+[assembly: InternalsVisibleTo("Models.Test")]
 namespace Models.DbModels
 {
     /// <summary>
@@ -114,5 +116,32 @@ namespace Models.DbModels
         [DataMember(IsRequired = false)]
         [NotMapped]
         public QuizAttempt LastAttempt { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DataMember(IsRequired = false)]
+        [NotMapped]
+        public bool CanStart =>
+            IsAvailable(this) &&
+            (LastAttempt == null || (LastAttempt.Status != QuizAttemptStatus.Incomplete && Repeatable));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [DataMember(IsRequired = false)]
+        [NotMapped]
+        public bool CanResume =>
+            IsAvailable(this) &&
+            LastAttempt != null &&
+            LastAttempt.Status == QuizAttemptStatus.Incomplete;
+
+        internal static bool IsAvailable(Quiz quiz)
+        {
+            return
+                quiz != null &&
+                (quiz.AvailableFrom == null || DateTime.Now >= quiz.AvailableFrom) &&
+                (quiz.AvailableTo == null || DateTime.Now < quiz.AvailableTo);
+        }
     }
 }

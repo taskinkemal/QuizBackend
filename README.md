@@ -35,3 +35,12 @@ Password helper functions:
 -> returns a list of questions of the given quiz. This includes the option id's for each question. Questions are ordered.
 3. [GET] Options/Quiz/{Quiz Id}
 -> returns a list of options of the given quiz. Options are ordered.
+
+## Quiz
+
+- [PUT] QuizAttempts/{Quiz Id}
+returns the quiz attempt instance with the auto generated quiz attempt Id. Use this to start a quiz.
+- [POST] QuizAttempts/{Quiz Id} {"timeSpent":"time spent in seconds", "endQuiz": "boolean"}
+updates the time spent, and also used for completing the quiz.
+- [POST] Answers/{Attempt Id} {"timeSpent":"time spent in seconds", "questionId": "question Id", "options": "list of option Ids"}
+answers the question.

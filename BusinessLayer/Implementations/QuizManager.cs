@@ -34,17 +34,7 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<List<Quiz>> GetUserQuizList(int userId)
         {
-            var expiredAttempts = (from qa in Context.QuizAttempts
-                                   join q in Context.Quizes on qa.QuizId equals q.Id
-                                   where qa.UserId == userId && q.AvailableTo != null
-                                   && q.AvailableTo < DateTime.Now && qa.Status == QuizAttemptStatus.Incomplete
-                                   select new { Attempt = qa, Quiz = q }
-                                  ).ToList();
-
-            foreach (var item in expiredAttempts)
-            {
-                await quizAttemptManager.FinishQuizAsync(item.Attempt, item.Quiz.PassScore, item.Attempt.TimeSpent);
-            }
+            await CompleteExpiredQuizzes(userId);
 
             var attempts = Context.QuizAttempts
                 .Where(a => a.UserId == userId)
@@ -67,6 +57,21 @@ namespace BusinessLayer.Implementations
             }
 
             return await Task.FromResult(quizes);
+        }
+
+        private async Task CompleteExpiredQuizzes(int userId)
+        {
+            var expiredAttempts = (from qa in Context.QuizAttempts
+                                   join q in Context.Quizes on qa.QuizId equals q.Id
+                                   where qa.UserId == userId && q.AvailableTo != null
+                                   && q.AvailableTo < DateTime.Now && qa.Status == QuizAttemptStatus.Incomplete
+                                   select new { Attempt = qa, Quiz = q }
+                                  ).ToList();
+
+            foreach (var item in expiredAttempts)
+            {
+                await quizAttemptManager.FinishQuizAsync(item.Attempt, item.Quiz.PassScore, item.Attempt.TimeSpent);
+            }
         }
 
         internal async Task<(int QuizIdentityId, int QuizId)> InsertQuizInternalAsync(int userId, Quiz quiz)
