@@ -102,7 +102,8 @@ namespace Models.Test
                 TimeLimitInSeconds = 600,
                 Status = QuizStatus.Inactive,
                 Title = "Quiz Title",
-                Intro = "Quiz Intro"
+                Intro = "Quiz Intro",
+                Version = 3
             };
 
             Assert.AreEqual(true, quiz.ShuffleQuestions);
@@ -113,6 +114,7 @@ namespace Models.Test
             Assert.AreEqual(QuizStatus.Inactive, quiz.Status);
             Assert.AreEqual("Quiz Title", quiz.Title);
             Assert.AreEqual("Quiz Intro", quiz.Intro);
+            Assert.AreEqual(3, quiz.Version);
         }
     }
 }
