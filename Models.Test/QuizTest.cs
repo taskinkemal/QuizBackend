@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.DbModels;
 
@@ -103,7 +104,9 @@ namespace Models.Test
                 Status = QuizStatus.Inactive,
                 Title = "Quiz Title",
                 Intro = "Quiz Intro",
-                Version = 3
+                Version = 3,
+                Id = 55,
+                QuestionIds = new [] { 5, 6}
             };
 
             Assert.AreEqual(true, quiz.ShuffleQuestions);
@@ -115,6 +118,10 @@ namespace Models.Test
             Assert.AreEqual("Quiz Title", quiz.Title);
             Assert.AreEqual("Quiz Intro", quiz.Intro);
             Assert.AreEqual(3, quiz.Version);
+            Assert.AreEqual(55, quiz.Id);
+            Assert.IsTrue(quiz.QuestionIds.Contains(5));
+            Assert.IsTrue(quiz.QuestionIds.Contains(6));
+            Assert.AreEqual(2, quiz.QuestionIds.Count());
         }
     }
 }
