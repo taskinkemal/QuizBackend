@@ -15,6 +15,24 @@ namespace WebApplication.Test
     public class UsersTest
     {
         [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task GetMeThrowsError()
+        {
+            var result = await ExecuteGet(false, 54);
+
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetMe()
+        {
+            var result = await ExecuteGet(true, 54);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(54, result.Id);
+        }
+
+        [TestMethod]
         public async Task Put()
         {
             var result = await ExecutePut(InsertUserResponse.Success);
@@ -52,7 +70,6 @@ namespace WebApplication.Test
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, (HttpStatusCode)result.StatusCode);
         }
-
 
         [TestMethod]
         [ExpectedException(typeof(NullReferenceException))]
@@ -111,6 +128,29 @@ namespace WebApplication.Test
             var result = await controller.Delete(5);
 
             Assert.AreEqual(expected, result);
+        }
+
+        private async Task<Models.DbModels.User> ExecuteGet(bool isAuthenticated, int userId)
+        {
+            var userManager = new Mock<IUserManager>();
+            userManager.Setup(c => c.GetUserAsync(It.IsAny<int>()))
+                .Returns<int>((uid) =>
+                Task.FromResult(new Models.DbModels.User { Id = uid }));
+
+            var controller = new UsersController(userManager.Object);
+            if (isAuthenticated)
+            {
+                controller.Token = new Models.TransferObjects.AuthToken
+                {
+                    Token = "token",
+                    UserId = userId,
+                    ValidUntil = DateTime.Now.AddDays(1),
+                    IsVerified = true
+                };
+            }
+            var result = await controller.GetMe();
+
+            return result;
         }
 
         private async Task<JsonResult> ExecutePut(InsertUserResponse response)

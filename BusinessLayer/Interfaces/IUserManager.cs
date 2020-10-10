@@ -11,6 +11,13 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<Models.DbModels.User> GetUserAsync(int userId);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         System.Threading.Tasks.Task<bool> SendPasswordResetEmail(string email);

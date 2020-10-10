@@ -16,6 +16,52 @@ namespace BusinessLayer.Test
     public class UserManagerTest
     {
         [TestMethod]
+        public async Task GetUser()
+        {
+            var logManager = new Mock<ILogManager>();
+            int userId;
+            Models.DbModels.User user = null;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager.Object);
+
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                userId = await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
+
+                await context.SaveChangesAsync();
+
+                user = await sut.GetUserAsync(userId);
+            }
+
+            Assert.AreEqual(userId, user.Id);
+        }
+
+        [TestMethod]
+        public async Task GetUserNull()
+        {
+            var logManager = new Mock<ILogManager>();
+            int userId;
+            Models.DbModels.User user = null;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager.Object);
+
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
+                userId = await sut.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(2), true);
+
+                await context.SaveChangesAsync();
+
+                user = await sut.GetUserAsync(userId + 1);
+            }
+
+            Assert.IsNull(user);
+        }
+
+        [TestMethod]
         public async Task SendPasswordResetEmailCreatesToken()
         {
             const string password = "mypassword123";

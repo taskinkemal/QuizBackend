@@ -37,6 +37,16 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<Models.DbModels.User> GetUserAsync(int userId)
+        {
+            return await Context.Users.FindAsync(userId);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         public async Task<bool> SendPasswordResetEmail(string email)
