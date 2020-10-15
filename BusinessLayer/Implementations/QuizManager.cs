@@ -59,6 +59,23 @@ namespace BusinessLayer.Implementations
             return await Task.FromResult(quizes);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<Quiz>> GetAdminQuizList(int userId)
+        {
+            var quizes = (
+                from qi in Context.QuizIdentities
+                join q in Context.Quizes on qi.Id equals q.QuizIdentityId
+                where qi.OwnerId == userId
+                orderby qi.Id, q.Id
+                select q).ToList();
+
+            return await Task.FromResult(quizes);
+        }
+
         private async Task CompleteExpiredQuizzes(int userId)
         {
             var expiredAttempts = (from qa in Context.QuizAttempts

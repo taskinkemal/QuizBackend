@@ -84,5 +84,36 @@ namespace BusinessLayer.Test
             Assert.IsNotNull(result[0].LastAttempt);
             Assert.AreEqual(QuizAttemptStatus.Completed, result[0].LastAttempt.Status);
         }
+
+        [TestMethod]
+        public async Task GetAdminQuizList()
+        {
+            List<Quiz> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var userManager = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
+                var sut = new QuizManager(context, new QuizAttemptManager(context, Mock.Of<IQuestionManager>(), logManager), logManager);
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var userId = await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(0), true);
+                await sut.InsertQuizInternalAsync(userId, ManagerTestHelper.CreateQuiz(0));
+                await sut.InsertQuizInternalAsync(userId, ManagerTestHelper.CreateQuiz(1));
+
+                await context.SaveChangesAsync();
+
+                result = await sut.GetAdminQuizList(userId);
+            }
+
+            Assert.AreEqual(2, result.Count);
+        }
     }
 }

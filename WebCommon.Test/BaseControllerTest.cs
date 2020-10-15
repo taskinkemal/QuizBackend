@@ -5,6 +5,7 @@ using WebCommon.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Models.TransferObjects;
+using Common;
 
 namespace WebCommon.Test
 {
@@ -16,7 +17,7 @@ namespace WebCommon.Test
         {
             var result = RequiresAuthentication<NoAuthController>();
 
-            Assert.IsFalse(result);
+            Assert.AreEqual(AuthenticationLevel.NoAuthentication, result);
         }
 
         [TestMethod]
@@ -24,7 +25,15 @@ namespace WebCommon.Test
         {
             var result = RequiresAuthentication<AuthController>();
 
-            Assert.IsTrue(result);
+            Assert.AreEqual(AuthenticationLevel.User, result);
+        }
+
+        [TestMethod]
+        public void ManagementAuthControllerAttribute()
+        {
+            var result = RequiresAuthentication<ManagementController>();
+
+            Assert.AreEqual(AuthenticationLevel.Admin, result);
         }
 
         [TestMethod]
@@ -62,11 +71,11 @@ namespace WebCommon.Test
         }
 
 
-        private bool RequiresAuthentication<T>() where T: BaseController
+        private AuthenticationLevel RequiresAuthentication<T>() where T: BaseController
         {
             var attribute = GetTypeFilterAttribute<ExecutionFilterAttribute>(typeof(T));
 
-            return (bool)attribute.Arguments[0];
+            return (AuthenticationLevel)attribute.Arguments[0];
         }
     }
 }

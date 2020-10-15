@@ -22,19 +22,19 @@ namespace WebCommon.Attributes
     {
         private readonly IAuthManager authManager;
         private readonly IContextManager contextManager;
-        private readonly bool authenticationRequired;
+        private readonly AuthenticationLevel authenticationLevel;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="authManager"></param>
         /// <param name="contextManager"></param>
-        /// <param name="authenticationRequired"></param>
-        public ExecutionFilterAttribute(IAuthManager authManager, IContextManager contextManager, bool authenticationRequired)
+        /// <param name="authenticationLevel"></param>
+        public ExecutionFilterAttribute(IAuthManager authManager, IContextManager contextManager, AuthenticationLevel authenticationLevel)
         {
             this.authManager = authManager;
             this.contextManager = contextManager;
-            this.authenticationRequired = authenticationRequired;
+            this.authenticationLevel = authenticationLevel;
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace WebCommon.Attributes
 
             var result = ValidateRequest(context.Controller as IBaseController, accessToken).Result;
 
-            if (ProceedWithExecution(result.isValid, authenticationRequired, HasAuthenticateAttribute(context.ActionDescriptor as ControllerActionDescriptor)))
+            if (ProceedWithExecution(result.isValid, authenticationLevel, HasAuthenticateAttribute(context.ActionDescriptor as ControllerActionDescriptor)))
             {
                 base.OnActionExecuting(context);
             }
@@ -126,9 +126,9 @@ namespace WebCommon.Attributes
             t.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
         }
 
-        internal static bool ProceedWithExecution(bool isValid, bool authenticationRequired, bool hasAuthenticateAttribute)
+        internal static bool ProceedWithExecution(bool isValid, AuthenticationLevel authenticationLevel, bool hasAuthenticateAttribute)
         {
-            return isValid || !(authenticationRequired || hasAuthenticateAttribute);
+            return isValid || !(authenticationLevel != AuthenticationLevel.NoAuthentication || hasAuthenticateAttribute);
         }
 
         internal static bool HasAuthenticateAttribute(ControllerActionDescriptor descriptor)

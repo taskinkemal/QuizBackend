@@ -114,6 +114,7 @@ namespace WebApplication.Controllers
         [HttpDelete]
         public async Task<bool> Delete(int id)
         {
+            //TODO: check rights.
             var result = await userManager.DeleteUserAsync(id);
             return result;
         }

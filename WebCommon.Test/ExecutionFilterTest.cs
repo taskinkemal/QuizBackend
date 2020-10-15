@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
+using Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ namespace WebCommon.Test
                 .SetupSet(p => p.Token = It.IsAny<AuthToken>())
                 .Callback<AuthToken>(value => actual = value);
 
-            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var result = await sut.ValidateRequest(controller.Object, tokenString);
 
@@ -58,7 +59,7 @@ namespace WebCommon.Test
             var token = GetAuthToken(tokenString, false);
             var authManager = GetAuthManager(token);
 
-            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), tokenString);
 
@@ -73,7 +74,7 @@ namespace WebCommon.Test
 
             var authManager = GetAuthManager(null);
 
-            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), true);
+            var sut = new ExecutionFilterAttribute(authManager, Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), tokenString);
 
@@ -84,7 +85,7 @@ namespace WebCommon.Test
         [TestMethod]
         public async Task ValidateRequestNoToken()
         {
-            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), true);
+            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var result = await sut.ValidateRequest(Mock.Of<IBaseController>(), null);
 
@@ -95,7 +96,7 @@ namespace WebCommon.Test
         [TestMethod]
         public async Task ValidateRequestInvalidController()
         {
-            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), true);
+            var sut = new ExecutionFilterAttribute(Mock.Of<IAuthManager>(), Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var result = await sut.ValidateRequest(null, "token");
 
@@ -210,36 +211,17 @@ namespace WebCommon.Test
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
-        public void ProceedWithExecutionReturnsTrueWhenValid()
+        [DataTestMethod]
+        [DataRow(true, true, AuthenticationLevel.Admin, true)]
+        [DataRow(true, true, AuthenticationLevel.User, true)]
+        [DataRow(true, false, AuthenticationLevel.NoAuthentication, false)]
+        [DataRow(false, false, AuthenticationLevel.NoAuthentication, true)]
+        [DataRow(false, false, AuthenticationLevel.User, false)]
+        public void ProceedWithExecution(bool expected, bool isValid, AuthenticationLevel authenticationLevel, bool hasAuthenticateAttribute)
         {
-            var result = ExecutionFilterAttribute.ProceedWithExecution(true, true, true);
+            var result = ExecutionFilterAttribute.ProceedWithExecution(isValid, authenticationLevel, hasAuthenticateAttribute);
 
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public void ProceedWithExecutionReturnsTrueWhenAuthenticationIsNotRequiredAndWithNoAttribute()
-        {
-            var result = ExecutionFilterAttribute.ProceedWithExecution(false, false, false);
-
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public void ProceedWithExecutionReturnsFalseWhenAuthenticationIsNotRequiredAndWithAttribute()
-        {
-            var result = ExecutionFilterAttribute.ProceedWithExecution(false, false, true);
-
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void ProceedWithExecutionReturnsFalseWhenAuthenticationIsRequired()
-        {
-            var result = ExecutionFilterAttribute.ProceedWithExecution(false, true, false);
-
-            Assert.IsFalse(result);
+            Assert.AreEqual(expected, result);
         }
 
         [TestMethod]
@@ -266,7 +248,6 @@ namespace WebCommon.Test
         [TestMethod]
         public void OnActionExecuting()
         {
-            const bool authenticationRequired = true;
             const string token = "MyToken";
 
             var authManager = new Mock<IAuthManager>();
@@ -286,7 +267,7 @@ namespace WebCommon.Test
                 return Task.FromResult(default(AuthToken));
             });
 
-            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), authenticationRequired);
+            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var dictionary =
                 new HeaderDictionary(new Dictionary<string, StringValues> {{"Authorization", "Bearer " + token}});
@@ -317,7 +298,6 @@ namespace WebCommon.Test
         [TestMethod]
         public void OnActionExecutingTokenInvalid()
         {
-            const bool authenticationRequired = true;
             const string token = "MyToken";
 
             var authManager = new Mock<IAuthManager>();
@@ -337,7 +317,7 @@ namespace WebCommon.Test
                 return Task.FromResult(default(AuthToken));
             });
 
-            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), authenticationRequired);
+            var sut = new ExecutionFilterAttribute(authManager.Object, Mock.Of<IContextManager>(), AuthenticationLevel.User);
 
             var dictionary =
                 new HeaderDictionary(new Dictionary<string, StringValues> { { "Authorization", "Bearer " + token + "somesuffix" } });

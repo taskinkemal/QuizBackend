@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common;
+using Microsoft.AspNetCore.Mvc;
 using WebCommon.Attributes;
 
 namespace WebCommon.BaseControllers
@@ -7,6 +8,6 @@ namespace WebCommon.BaseControllers
     /// <summary>
     /// Throws when token is invalid.
     /// </summary>
-    [TypeFilter(typeof(ExecutionFilterAttribute), Arguments = new object[] { true })]
+    [TypeFilter(typeof(ExecutionFilterAttribute), Arguments = new object[] { AuthenticationLevel.User })]
     public class AuthController : BaseController { }
 }
