@@ -263,7 +263,7 @@ namespace BusinessLayer.Implementations
                 return QuizAttemptStatus.Completed;
             }
 
-            return score >= passScore ? QuizAttemptStatus.Passed : QuizAttemptStatus.Failed;
+            return score >= passScore.Value ? QuizAttemptStatus.Passed : QuizAttemptStatus.Failed;
         }
 
         internal async Task<QuizAttempt> InsertAttemptInternalAsync(int userId, int quizId)

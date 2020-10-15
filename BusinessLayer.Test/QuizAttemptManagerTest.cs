@@ -489,6 +489,24 @@ namespace BusinessLayer.Test
                 IsCorrect = true,
                 IsMarked = false
             });
+            options.Add(new QuestionAnswer
+            {
+                QuestionId = 5,
+                IsCorrect = true,
+                IsMarked = true
+            });
+            options.Add(new QuestionAnswer
+            {
+                QuestionId = 5,
+                IsCorrect = true,
+                IsMarked = true
+            });
+            options.Add(new QuestionAnswer
+            {
+                QuestionId = 5,
+                IsCorrect = false,
+                IsMarked = true
+            });
 
             var questions = new List<Question>();
             questions.Add(new Question
@@ -511,12 +529,17 @@ namespace BusinessLayer.Test
                 Id = 4,
                 Level = 2
             });
+            questions.Add(new Question
+            {
+                Id = 5,
+                Level = 5
+            });
 
             var result = QuizAttemptManager.EvaluateQuiz(questions, options);
 
             Assert.AreEqual(2, result.CorrectCount);
-            Assert.AreEqual(1, result.IncorrectCount);
-            Assert.AreEqual(53.85M, result.Score);
+            Assert.AreEqual(2, result.IncorrectCount);
+            Assert.AreEqual(38.89M, result.Score);
         }
 
         [DataTestMethod]
