@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
 using Common;
@@ -40,6 +41,19 @@ namespace WebApplication.Controllers
             var token = await authManager.GenerateTokenAsync(data);
 
             return token != null ? ControllerHelper.CreateResponse(token) : ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        public async Task<JsonResult> Get(string token)
+        {
+            var result = await authManager.VerifyAccessToken(token);
+            return ControllerHelper.CreateResponse(result != null && result.ValidUntil > DateTime.Now);
         }
     }
 }

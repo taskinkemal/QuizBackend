@@ -6,7 +6,6 @@ using Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace WebCommon
 {
@@ -52,7 +51,6 @@ namespace WebCommon
         {
             serializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
             serializerSettings.DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss";
-            serializerSettings.ContractResolver = new DefaultContractResolver();
             serializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
             serializerSettings.NullValueHandling = NullValueHandling.Ignore;
         }
