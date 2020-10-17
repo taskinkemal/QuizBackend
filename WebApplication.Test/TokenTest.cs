@@ -108,5 +108,47 @@ namespace WebApplication.Test
 
             Assert.IsFalse(resultObject.Value);
         }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task Delete(bool response)
+        {
+            var authManager = new Mock<IAuthManager>();
+            authManager.Setup(c => c.DeleteAccessToken(It.IsAny<string>()))
+                .Returns<string>(r => Task.FromResult(response));
+
+            var sut = new TokenController(authManager.Object);
+            sut.Token = new Models.TransferObjects.AuthToken
+            {
+                Token = "testtoken",
+                UserId = 43
+            };
+
+            var result = await sut.Delete();
+
+            var resultObject = (GenericWrapper<bool>)result.Value;
+
+            Assert.AreEqual(response, resultObject.Value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task DeleteThrowsError()
+        {
+            const bool response = true;
+
+            var authManager = new Mock<IAuthManager>();
+            authManager.Setup(c => c.DeleteAccessToken(It.IsAny<string>()))
+                .Returns<string>(r => Task.FromResult(response));
+
+            var sut = new TokenController(authManager.Object);
+
+            var result = await sut.Delete();
+
+            var resultObject = (GenericWrapper<bool>)result.Value;
+
+            Assert.AreEqual(response, resultObject.Value);
+        }
     }
 }

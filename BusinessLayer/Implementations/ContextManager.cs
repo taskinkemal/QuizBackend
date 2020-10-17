@@ -42,5 +42,14 @@ namespace BusinessLayer.Implementations
             transaction.Rollback();
             transaction.Dispose();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Commit()
+        {
+            transaction.Commit();
+            transaction.Dispose();
+        }
     }
 }

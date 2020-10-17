@@ -32,7 +32,7 @@ namespace WebApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("Users/me")]
+        [Route("me")]
         public async Task<Models.DbModels.User> GetMe()
         {
             return await userManager.GetUserAsync(Token.UserId);

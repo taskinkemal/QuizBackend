@@ -18,5 +18,10 @@ namespace BusinessLayer.Interfaces
         /// 
         /// </summary>
         void Rollback();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Commit();
     }
 }

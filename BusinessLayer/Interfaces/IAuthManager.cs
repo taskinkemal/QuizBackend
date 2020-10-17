@@ -36,5 +36,12 @@ namespace BusinessLayer.Interfaces
         /// <param name="accessToken"></param>
         /// <returns></returns>
         System.Threading.Tasks.Task<Models.DbModels.UserToken> GetAccessToken(string accessToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<bool> DeleteAccessToken(string accessToken);
     }
 }

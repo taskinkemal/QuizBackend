@@ -5,6 +5,7 @@ using BusinessLayer.Interfaces;
 using Common;
 using Microsoft.AspNetCore.Mvc;
 using Models.TransferObjects;
+using WebCommon.Attributes;
 using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers
@@ -54,6 +55,19 @@ namespace WebApplication.Controllers
         {
             var result = await authManager.VerifyAccessToken(token);
             return ControllerHelper.CreateResponse(result != null && result.ValidUntil > DateTime.Now);
+        }
+
+        /// <summary>
+        /// Log out user
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authenticate]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        public async Task<JsonResult> Delete()
+        {
+            var result = await authManager.DeleteAccessToken(Token.Token);
+            return ControllerHelper.CreateResponse(result);
         }
     }
 }

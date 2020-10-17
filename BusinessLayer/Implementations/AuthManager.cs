@@ -146,5 +146,27 @@ namespace BusinessLayer.Implementations
 
             return token;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<bool> DeleteAccessToken(string accessToken)
+        {
+            var token = await Context.UserTokens.FirstOrDefaultAsync(t =>
+                t.Token == accessToken);
+
+            if (token == null)
+            {
+                return false;
+            }
+
+            Context.UserTokens.Remove(token);
+
+            await Context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

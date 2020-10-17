@@ -53,6 +53,7 @@ namespace WebCommon.Attributes
             if (ProceedWithExecution(result.isValid, authenticationLevel, HasAuthenticateAttribute(context.ActionDescriptor as ControllerActionDescriptor)))
             {
                 base.OnActionExecuting(context);
+                contextManager.Commit();
             }
             else
             {

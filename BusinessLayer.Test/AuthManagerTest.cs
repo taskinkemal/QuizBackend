@@ -331,6 +331,57 @@ namespace BusinessLayer.Test
             Assert.IsNull(token);
         }
 
+        [TestMethod]
+        public async Task DeleteAccessToken()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            const bool isUserVerified = false;
+            bool result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, isUserVerified);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString, true);
+
+                await context.SaveChangesAsync();
+
+                result = await sut.DeleteAccessToken(tokenString);
+            }
+
+            Assert.IsTrue(result);
+        }
+
+
+        [TestMethod]
+        public async Task DeleteAccessTokenFalse()
+        {
+            const string password = "mypassword123";
+            const string email = "user1@mymail.com";
+            const string deviceId = "mydevice";
+            const string tokenString = "randomtokenstring12345";
+            const bool isUserVerified = false;
+            bool result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = ManagerTestHelper.GetAuthManager(context);
+
+                var user = await ManagerTestHelper.AddUserAsync(context, 1, email, password, isUserVerified);
+                await ManagerTestHelper.AddAuthTokenAsync(context, user.Id, deviceId, tokenString, true);
+
+                await context.SaveChangesAsync();
+
+                result = await sut.DeleteAccessToken("someothertoken");
+            }
+
+            Assert.IsFalse(result);
+        }
+
         private async Task<UserToken> GetAccessTokenInternal(bool isValid)
         {
             const string password = "mypassword123";
