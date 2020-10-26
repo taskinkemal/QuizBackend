@@ -76,6 +76,28 @@ namespace BusinessLayer.Implementations
             return await Task.FromResult(quizes);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quiz"></param>
+        /// <returns></returns>
+        public async Task<int> InsertQuiz(int userId, Quiz quiz)
+        {
+            return await Task.FromResult(1);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quiz"></param>
+        /// <returns></returns>
+        public async Task<int> UpdateQuiz(int userId, Quiz quiz)
+        {
+            return await Task.FromResult(1);
+        }
+
         private async Task CompleteExpiredQuizzes(int userId)
         {
             var expiredAttempts = (from qa in Context.QuizAttempts

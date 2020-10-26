@@ -32,5 +32,29 @@ namespace WebApplication.Controllers.Admin
         {
             return await quizManager.GetAdminQuizList(Token.UserId);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="quiz"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<int> PutUpdateQuiz(int id, [FromBody] Quiz quiz)
+        {
+            return await quizManager.UpdateQuiz(Token.UserId, quiz);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="quiz"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<int> PutInsertQuiz([FromBody] Quiz quiz)
+        {
+            return await quizManager.InsertQuiz(Token.UserId, quiz);
+        }
     }
 }
