@@ -1,5 +1,4 @@
-﻿using Models.DbModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebCommon.BaseControllers;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
@@ -44,16 +43,27 @@ namespace WebApplication.Controllers
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
         [HttpPost]
         [Route("Answers/{id}")]
-        public async Task<JsonResult> Post(int id, [FromBody] Models.TransferObjects.Answer answer)
+        public async Task<JsonResult> Post(int id, [FromBody] Answer answer)
         {
             var result = await quizAttemptManager.InsertAnswerAsync(Token.UserId, id, answer);
 
-            return
-                result == UpdateQuizAttemptStatusResult.Success ? ControllerHelper.CreateResponse(result) :
-                result == UpdateQuizAttemptStatusResult.NotAuthorized ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized") :
-                result == UpdateQuizAttemptStatusResult.StatusError ? ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError") :
-                result == UpdateQuizAttemptStatusResult.TimeUp ? ControllerHelper.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "TimeUp") :
-                    ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "DateError");
+            switch (result)
+            {
+                case UpdateQuizAttemptStatusResult.DateError:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "DateError");
+
+                case UpdateQuizAttemptStatusResult.NotAuthorized:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+
+                case UpdateQuizAttemptStatusResult.StatusError:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Conflict, "StatusError");
+
+                case UpdateQuizAttemptStatusResult.TimeUp:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "TimeUp");
+
+                default:
+                    return ControllerHelper.CreateResponse(result);
+            }
         }
     }
 }

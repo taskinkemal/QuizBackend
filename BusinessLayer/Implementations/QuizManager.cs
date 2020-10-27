@@ -6,6 +6,7 @@ using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common.Interfaces;
 using Models.DbModels;
+using Models.TransferObjects;
 
 namespace BusinessLayer.Implementations
 {
@@ -82,20 +83,151 @@ namespace BusinessLayer.Implementations
         /// <param name="userId"></param>
         /// <param name="quiz"></param>
         /// <returns></returns>
-        public async Task<int> InsertQuiz(int userId, Quiz quiz)
+        public async Task<SaveQuizResult> InsertQuiz(int userId, Quiz quiz)
         {
-            return await Task.FromResult(1);
+            if (quiz == null)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            if (quiz.Id != default || quiz.QuizIdentityId != default)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.NotAuthorized
+                };
+            }
+
+            if (!IsValid(quiz))
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            var result = await InsertQuizInternalAsync(userId, quiz);
+
+            return new SaveQuizResult
+            {
+                Status = SaveQuizResultStatus.Success,
+                Result = result.QuizId
+            };
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="userId"></param>
+        /// <param name="quizId"></param>
         /// <param name="quiz"></param>
         /// <returns></returns>
-        public async Task<int> UpdateQuiz(int userId, Quiz quiz)
+        public async Task<SaveQuizResult> UpdateQuiz(int userId, int quizId, Quiz quiz)
         {
-            return await Task.FromResult(1);
+            if (quiz == null)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            if (quiz.Id != quizId)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.NotAuthorized
+                };
+            }
+
+            var authorizationResult = await AuthorizeQuizUpdateRequest(userId, quiz);
+
+            if (authorizationResult != SaveQuizResultStatus.Success)
+            {
+                return new SaveQuizResult
+                {
+                    Status = authorizationResult
+                };
+            }
+
+            if (!IsValid(quiz))
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            Context.Quizes.Update(quiz);
+            await Context.SaveChangesAsync();
+
+            return new SaveQuizResult
+            {
+                Status = SaveQuizResultStatus.Success,
+                Result = quizId
+            };
+        }
+
+        internal async Task<SaveQuizResultStatus> AuthorizeQuizUpdateRequest(int userId, Quiz quiz)
+        {
+            if (quiz == null)
+            {
+                return SaveQuizResultStatus.GeneralError;
+            }
+
+            var quizDb = await Context.Quizes.FindAsync(quiz.Id);
+
+            if (quizDb == null || quiz.QuizIdentityId != quizDb.QuizIdentityId)
+            {
+                return SaveQuizResultStatus.NotAuthorized;
+            }
+
+            if (quiz.Version != quizDb.Version || quiz.Status != quizDb.Status)
+            {
+                return SaveQuizResultStatus.GeneralError;
+            }
+
+            if (!await IsOwner(userId, quiz.QuizIdentityId))
+            {
+                return SaveQuizResultStatus.NotAuthorized;
+            }
+
+            return SaveQuizResultStatus.Success;
+        }
+
+        internal async Task<bool> IsOwner(int userId, int quizIdentityId)
+        {
+            var quizIdentity = await Context.QuizIdentities.FindAsync(quizIdentityId);
+
+            return quizIdentity != null && quizIdentity.OwnerId == userId;
+        }
+
+        internal static bool IsValid(Quiz quiz)
+        {
+            if (quiz == null)
+            {
+                return false;
+            }
+
+            if (quiz.TimeConstraint && quiz.TimeLimitInSeconds <= 0)
+            {
+                return false;
+            }
+
+            if (quiz.PassScore.HasValue && (quiz.PassScore < 0 || quiz.PassScore > 100))
+            {
+                return false;
+            }
+
+            if (quiz.AvailableFrom.HasValue && quiz.AvailableTo.HasValue && quiz.AvailableFrom > quiz.AvailableTo)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private async Task CompleteExpiredQuizzes(int userId)

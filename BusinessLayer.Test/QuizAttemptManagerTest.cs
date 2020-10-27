@@ -574,7 +574,7 @@ namespace BusinessLayer.Test
                 attempt = createAttemptResult.Attempt;
                 optionIds = quizData.OptionIds.Skip(2).Take(2).ToList();
 
-                result = await sut.InsertAnswerAsync(userId, attempt.Id,
+                await sut.InsertAnswerAsync(userId, attempt.Id,
                     new Models.TransferObjects.Answer
                     {
                         QuestionId = quizData.QuestionIds[0],
@@ -621,8 +621,7 @@ namespace BusinessLayer.Test
                 var userId = await ManagerTestHelper.AssignQuizAsync(context, quiz.QuizIdentityId);
 
                 var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
-                var optionIds = quizData.OptionIds.Skip(2).Take(2).ToList();
-
+                
                 result = await sut.InsertAnswerAsync(userId, 8,
                     new Models.TransferObjects.Answer
                     {

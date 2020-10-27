@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Common.Interfaces;
 using Models.DbModels;
+using Models.TransferObjects;
 
 namespace BusinessLayer.Interfaces
 {
@@ -30,14 +31,15 @@ namespace BusinessLayer.Interfaces
         /// <param name="userId"></param>
         /// <param name="quiz"></param>
         /// <returns></returns>
-        Task<int> InsertQuiz(int userId, Quiz quiz);
+        Task<SaveQuizResult> InsertQuiz(int userId, Quiz quiz);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="userId"></param>
+        /// <param name="quizId"></param>
         /// <param name="quiz"></param>
         /// <returns></returns>
-        Task<int> UpdateQuiz(int userId, Quiz quiz);
+        Task<SaveQuizResult> UpdateQuiz(int userId, int quizId, Quiz quiz);
     }
 }

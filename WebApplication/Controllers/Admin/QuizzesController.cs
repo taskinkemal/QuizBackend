@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
+using Common;
 using Microsoft.AspNetCore.Mvc;
 using Models.DbModels;
+using Models.TransferObjects;
 using WebCommon.BaseControllers;
 
 namespace WebApplication.Controllers.Admin
@@ -39,11 +42,28 @@ namespace WebApplication.Controllers.Admin
         /// <param name="id"></param>
         /// <param name="quiz"></param>
         /// <returns></returns>
+        /// <response code="401">User is not authorized to update the quiz.</response>
+        /// <response code="406">Quiz data is not acceptable.</response>
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
         [HttpPut]
         [Route("{id}")]
-        public async Task<int> PutUpdateQuiz(int id, [FromBody] Quiz quiz)
+        public async Task<JsonResult> PutUpdateQuiz(int id, [FromBody] Quiz quiz)
         {
-            return await quizManager.UpdateQuiz(Token.UserId, quiz);
+            var result = await quizManager.UpdateQuiz(Token.UserId, id, quiz);
+
+            switch (result.Status)
+            {
+                case SaveQuizResultStatus.NotAuthorized:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+
+                case SaveQuizResultStatus.GeneralError:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "GeneralError");
+
+                default:
+                    return ControllerHelper.CreateResponse(result.Result);
+            }
         }
 
         /// <summary>
@@ -51,10 +71,27 @@ namespace WebApplication.Controllers.Admin
         /// </summary>
         /// <param name="quiz"></param>
         /// <returns></returns>
+        /// <response code="401">User is not authorized to add the quiz.</response>
+        /// <response code="406">Quiz data is not acceptable.</response>
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
         [HttpPut]
-        public async Task<int> PutInsertQuiz([FromBody] Quiz quiz)
+        public async Task<JsonResult> PutInsertQuiz([FromBody] Quiz quiz)
         {
-            return await quizManager.InsertQuiz(Token.UserId, quiz);
+            var result = await quizManager.InsertQuiz(Token.UserId, quiz);
+
+            switch (result.Status)
+            {
+                case SaveQuizResultStatus.NotAuthorized:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+
+                case SaveQuizResultStatus.GeneralError:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "GeneralError");
+
+                default:
+                    return ControllerHelper.CreateResponse(result.Result);
+            }
         }
     }
 }

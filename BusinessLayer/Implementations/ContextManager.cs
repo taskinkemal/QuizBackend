@@ -39,8 +39,11 @@ namespace BusinessLayer.Implementations
         /// </summary>
         public void Rollback()
         {
-            transaction.Rollback();
-            transaction.Dispose();
+            if (transaction != null)
+            {
+                transaction.Rollback();
+                transaction.Dispose();
+            }
         }
 
         /// <summary>
@@ -48,8 +51,11 @@ namespace BusinessLayer.Implementations
         /// </summary>
         public void Commit()
         {
-            transaction.Commit();
-            transaction.Dispose();
+            if (transaction != null)
+            {
+                transaction.Commit();
+                transaction.Dispose();
+            }
         }
     }
 }
