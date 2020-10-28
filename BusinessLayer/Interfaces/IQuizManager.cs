@@ -41,5 +41,13 @@ namespace BusinessLayer.Interfaces
         /// <param name="quiz"></param>
         /// <returns></returns>
         Task<SaveQuizResult> UpdateQuiz(int userId, int quizId, Quiz quiz);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizId"></param>
+        /// <returns></returns>
+        Task<bool> DeleteQuiz(int userId, int quizId);
     }
 }

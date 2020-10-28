@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Models.DbModels;
 using Models.TransferObjects;
 
@@ -171,6 +172,18 @@ namespace BusinessLayer.Implementations
             };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizId"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteQuiz(int userId, int quizId)
+        {
+            //TODO:
+            return await Task.FromResult(true);
+        }
+
         internal async Task<SaveQuizResultStatus> AuthorizeQuizUpdateRequest(int userId, Quiz quiz)
         {
             if (quiz == null)
@@ -178,7 +191,7 @@ namespace BusinessLayer.Implementations
                 return SaveQuizResultStatus.GeneralError;
             }
 
-            var quizDb = await Context.Quizes.FindAsync(quiz.Id);
+            var quizDb = Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefault(q => q.Id == quiz.Id);
 
             if (quizDb == null || quiz.QuizIdentityId != quizDb.QuizIdentityId)
             {

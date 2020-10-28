@@ -58,7 +58,7 @@ namespace WebApplication.Controllers.Admin
                 case SaveQuizResultStatus.NotAuthorized:
                     return ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
 
-                case SaveQuizResultStatus.GeneralError:
+               case SaveQuizResultStatus.GeneralError:
                     return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "GeneralError");
 
                 default:
@@ -92,6 +92,25 @@ namespace WebApplication.Controllers.Admin
                 default:
                     return ControllerHelper.CreateResponse(result.Result);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <response code="401">User is not authorized to delete the quiz.</response>
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<JsonResult> Delete(int id)
+        {
+            var result = await quizManager.DeleteQuiz(Token.UserId, id);
+
+            return result ?
+                ControllerHelper.CreateResponse(result) :
+                ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
         }
     }
 }

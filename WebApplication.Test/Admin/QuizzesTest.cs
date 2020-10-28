@@ -196,5 +196,51 @@ namespace WebApplication.Test.Admin
 
             Assert.AreEqual(HttpStatusCode.OK, (HttpStatusCode)result.StatusCode);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task DeleteThrowsException()
+        {
+            const int userId = 56;
+            const int quizId = 56;
+
+            var quizManager = new Mock<IQuizManager>();
+
+            quizManager.Setup(c => c.DeleteQuiz(userId, quizId))
+                .Returns(Task.FromResult(true));
+
+            var sut = new QuizzesController(quizManager.Object);
+
+            var result = await sut.Delete(quizId);
+
+            Assert.AreEqual(HttpStatusCode.OK, (HttpStatusCode)result.StatusCode);
+        }
+
+        [DataTestMethod]
+        [DataRow(HttpStatusCode.OK, true)]
+        [DataRow(HttpStatusCode.Unauthorized, false)]
+        public async Task DeleteReturnsOk(HttpStatusCode expected, bool response)
+        {
+            const int userId = 56;
+            const int quizId = 56;
+
+            var quizManager = new Mock<IQuizManager>();
+
+            quizManager.Setup(c => c.DeleteQuiz(userId, quizId))
+                .Returns(Task.FromResult(response));
+
+            var sut = new QuizzesController(quizManager.Object);
+            sut.Token = new AuthToken
+            {
+                Token = "token",
+                UserId = userId,
+                ValidUntil = DateTime.Now.AddDays(1),
+                IsVerified = true
+            };
+
+            var result = await sut.Delete(quizId);
+
+            Assert.AreEqual(expected, (HttpStatusCode)result.StatusCode);
+        }
     }
 }
