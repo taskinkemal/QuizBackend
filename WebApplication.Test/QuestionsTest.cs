@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BusinessLayer.Interfaces;
@@ -15,6 +16,7 @@ namespace WebApplication.Test
         [TestMethod]
         public async Task Get()
         {
+            const int userId = 32;
             const int quizId = 56;
             var questions = new List<Question>
             {
@@ -24,7 +26,38 @@ namespace WebApplication.Test
 
             var questionManager = new Mock<IQuestionManager>();
 
-            questionManager.Setup(c => c.GetQuizQuestions(quizId))
+            questionManager.Setup(c => c.GetQuizQuestions(userId, quizId))
+                .Returns(Task.FromResult(questions));
+
+            var sut = new QuestionsController(questionManager.Object);
+            sut.Token = new Models.TransferObjects.AuthToken
+            {
+                Token = "token",
+                UserId = userId,
+                ValidUntil = DateTime.Now.AddDays(1),
+                IsVerified = true
+            };
+
+            var result = await sut.Get(quizId);
+
+            Assert.AreEqual(questions.Count, result.ToList().Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task GetThrowsException()
+        {
+            const int userId = 32;
+            const int quizId = 56;
+            var questions = new List<Question>
+            {
+                new Question(),
+                new Question()
+            };
+
+            var questionManager = new Mock<IQuestionManager>();
+
+            questionManager.Setup(c => c.GetQuizQuestions(userId, quizId))
                 .Returns(Task.FromResult(questions));
 
             var sut = new QuestionsController(questionManager.Object);

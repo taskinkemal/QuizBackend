@@ -34,7 +34,7 @@ namespace WebApplication.Controllers
         [Route("Quiz/{id}")]
         public async Task<IEnumerable<Question>> Get(int id)
         {
-            return await questionManager.GetQuizQuestions(id);
+            return await questionManager.GetQuizQuestions(Token.UserId, id);
         }
     }
 }

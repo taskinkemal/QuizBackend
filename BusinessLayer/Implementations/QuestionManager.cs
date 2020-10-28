@@ -25,10 +25,12 @@ namespace BusinessLayer.Implementations
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="quizId"></param>
         /// <returns></returns>
-        public async Task<List<Question>> GetQuizQuestions(int quizId)
+        public async Task<List<Question>> GetQuizQuestions(int userId, int quizId)
         {
+            //TODO: can the user see the questions? either assigned or the owner.
             var questions =
                 (from q in Context.Quizes
                  join qq in Context.QuizQuestions on q.Id equals qq.QuizId

@@ -180,8 +180,20 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<bool> DeleteQuiz(int userId, int quizId)
         {
-            //TODO:
-            return await Task.FromResult(true);
+            var quiz = await Context.Quizes.FindAsync(quizId);
+
+            if (quiz == null)
+            {
+                return false;
+            }
+
+            if (!await IsOwner(userId, quiz.QuizIdentityId))
+            {
+                return false;
+            }
+
+            //TODO: should we delete the quiz identity as well?
+            return true;
         }
 
         internal async Task<SaveQuizResultStatus> AuthorizeQuizUpdateRequest(int userId, Quiz quiz)

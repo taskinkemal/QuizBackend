@@ -148,7 +148,7 @@ namespace BusinessLayer.Implementations
                 return false;
             }
 
-            var questions = (await questionManager.GetQuizQuestions(attempt.QuizId)).ToList();
+            var questions = (await questionManager.GetQuizQuestions(attempt.UserId, attempt.QuizId)).ToList();
 
             var options = (from qo in Context.QuestionOptions
                            join qq in Context.QuizQuestions on qo.QuestionId equals qq.QuestionId

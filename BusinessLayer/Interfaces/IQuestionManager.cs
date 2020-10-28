@@ -13,8 +13,9 @@ namespace BusinessLayer.Interfaces
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="quizId"></param>
         /// <returns></returns>
-        Task<List<Question>> GetQuizQuestions(int quizId);
+        Task<List<Question>> GetQuizQuestions(int userId, int quizId);
     }
 }
