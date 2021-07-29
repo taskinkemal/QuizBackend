@@ -47,9 +47,9 @@ namespace WebApplication.Controllers.Admin
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
-        [HttpPut]
+        [HttpPost]
         [Route("{id}")]
-        public async Task<JsonResult> PutUpdateQuiz(int id, [FromBody] Quiz quiz)
+        public async Task<JsonResult> PostUpdateQuiz(int id, [FromBody] Quiz quiz)
         {
             var result = await quizManager.UpdateQuiz(Token.UserId, id, quiz);
 

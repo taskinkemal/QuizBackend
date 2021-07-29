@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using BusinessLayer.Context;
 using BusinessLayer.Interfaces;
 using Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Models.DbModels;
+using Models.TransferObjects;
 
 namespace BusinessLayer.Implementations
 {
@@ -58,6 +60,110 @@ namespace BusinessLayer.Implementations
             }
 
             return await Task.FromResult(questions);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizId"></param>
+        /// <param name="questionId"></param>
+        /// <param name="question"></param>
+        /// <returns></returns>
+        public async Task<SaveQuizResult> UpdateQuestion(int userId, int quizId, int questionId, Question question)
+        {
+            if (question == null)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            if (question.Id != questionId)
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.NotAuthorized
+                };
+            }
+
+            var authorizationResult = AuthorizeQuestionUpdateRequest(userId, quizId, questionId);
+
+            if (authorizationResult != SaveQuizResultStatus.Success)
+            {
+                return new SaveQuizResult
+                {
+                    Status = authorizationResult
+                };
+            }
+
+            if (!IsValid(question))
+            {
+                return new SaveQuizResult
+                {
+                    Status = SaveQuizResultStatus.GeneralError
+                };
+            }
+
+            Context.Questions.Update(question);
+            await Context.SaveChangesAsync();
+
+            return new SaveQuizResult
+            {
+                Status = SaveQuizResultStatus.Success,
+                Result = questionId
+            };
+        }
+
+        internal SaveQuizResultStatus AuthorizeQuestionUpdateRequest(int userId, int quizId, int questionId)
+        {
+            var quizDb = Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefault(q => q.Id == quizId);
+            var quizQuestionDb = Context.QuizQuestions.AsQueryable().AsNoTracking().FirstOrDefault(q => q.QuizId == quizId && q.QuestionId == questionId);
+
+            if (quizDb == null)
+            {
+                return SaveQuizResultStatus.GeneralError;
+            }
+
+            if (quizQuestionDb == null)
+            {
+                return SaveQuizResultStatus.GeneralError;
+            }
+
+            var quizIdentityDb = Context.QuizIdentities.AsQueryable().AsNoTracking().FirstOrDefault(q => q.Id == quizDb.QuizIdentityId);
+
+            if (quizIdentityDb == null)
+            {
+                return SaveQuizResultStatus.GeneralError;
+            }
+
+            if (quizIdentityDb.OwnerId != userId)
+            {
+                return SaveQuizResultStatus.NotAuthorized;
+            }
+
+            return SaveQuizResultStatus.Success;
+        }
+
+        internal static bool IsValid(Question question)
+        {
+            if (question == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(question.Body))
+            {
+                return false;
+            }
+
+            if (question.Level < 1 || question.Level > 5)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         internal async Task<int> InsertQuestionInternalAsync(Question question)

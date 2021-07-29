@@ -36,5 +36,36 @@ namespace WebApplication.Controllers.Admin
         {
             return await questionManager.GetQuizQuestions(Token.UserId, id);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="questionId"></param>
+        /// <param name="question"></param>
+        /// <returns></returns>
+        /// <response code="401">User is not authorized to update the question.</response>
+        /// <response code="406">Question data is not acceptable.</response>
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(HttpErrorMessage), (int)HttpStatusCode.NotAcceptable)]
+        [HttpPost]
+        [Route("/Admin/Quizzes/{id}/Questions/{questionId}")]
+        public async Task<JsonResult> PostUpdateQuestion(int id, int questionId, [FromBody] Question question)
+        {
+            var result = await questionManager.UpdateQuestion(Token.UserId, id, questionId, question);
+
+            switch (result.Status)
+            {
+                case SaveQuizResultStatus.NotAuthorized:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+
+                case SaveQuizResultStatus.GeneralError:
+                    return ControllerHelper.CreateErrorResponse(HttpStatusCode.NotAcceptable, "GeneralError");
+
+                default:
+                    return ControllerHelper.CreateResponse(result.Result);
+            }
+        }
     }
 }
