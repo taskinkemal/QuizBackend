@@ -225,9 +225,7 @@ namespace BusinessLayer.Implementations
 
         internal async Task<bool> IsOwner(int userId, int quizIdentityId)
         {
-            var quizIdentity = await Context.QuizIdentities.FindAsync(quizIdentityId);
-
-            return quizIdentity != null && quizIdentity.OwnerId == userId;
+            return await base.IsQuizOwner(userId, quizIdentityId);
         }
 
         internal static bool IsValid(Quiz quiz)

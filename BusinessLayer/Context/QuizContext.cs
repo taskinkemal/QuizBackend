@@ -74,18 +74,10 @@ namespace BusinessLayer.Context
             modelBuilder.Entity<Option>()
                 .HasKey(c => c.Id);
 
-            modelBuilder.Entity<QuestionOption>()
-                .HasKey(c => new { c.QuestionId, c.OptionId });
-
-            modelBuilder.Entity<QuestionOption>()
+            modelBuilder.Entity<Option>()
                 .HasOne<Question>()
                 .WithMany()
                 .HasForeignKey(p => p.QuestionId);
-
-            modelBuilder.Entity<QuestionOption>()
-                .HasOne<Option>()
-                .WithMany()
-                .HasForeignKey(p => p.OptionId);
 
             modelBuilder.Entity<QuizQuestion>()
                 .HasKey(c => new { c.QuizId, c.QuestionId });
@@ -163,11 +155,6 @@ namespace BusinessLayer.Context
         /// 
         /// </summary>
         public DbSet<Option> Options { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public DbSet<QuestionOption> QuestionOptions { get; set; }
 
         /// <summary>
         /// 

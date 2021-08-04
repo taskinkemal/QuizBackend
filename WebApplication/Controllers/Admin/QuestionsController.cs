@@ -40,6 +40,17 @@ namespace WebApplication.Controllers.Admin
         /// <summary>
         /// 
         /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("/Admin/Quizzes/{id}/Questions/{questionId}/Options")]
+        public async Task<List<Option>> Get(int id, int questionId)
+        {
+            return await questionManager.GetQuestionOptions(Token.UserId, id, questionId);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="id"></param>
         /// <param name="questionId"></param>
         /// <param name="question"></param>

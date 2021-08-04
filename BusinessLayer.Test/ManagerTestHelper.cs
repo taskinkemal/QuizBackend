@@ -103,12 +103,14 @@ namespace BusinessLayer.Test
             };
         }
 
-        internal static Option CreateOption(int testId, bool isCorrect)
+        internal static Option CreateOption(int testId, bool isCorrect, int questionId, byte optionOrder)
         {
             return new Option
             {
                 Body = "Option Body " + testId,
-                IsCorrect = isCorrect
+                IsCorrect = isCorrect,
+                QuestionId = questionId,
+                OptionOrder = optionOrder
             };
         }
 
@@ -137,14 +139,12 @@ namespace BusinessLayer.Test
 
                 for (var j = 0; j < optionCount; j++)
                 {
-                    var optionId = await optionManager.InsertOptionInternalAsync(CreateOption(j, j == 1));
+                    var optionId = await optionManager.InsertOptionInternalAsync(CreateOption(j, j == 1, questionId, (byte)j));
 
                     if (i == 0)
                     {
                         optionIds.Add(optionId);
                     }
-
-                    await optionManager.AssignOptionInternalAsync(questionId, optionId);
                 }
             }
 

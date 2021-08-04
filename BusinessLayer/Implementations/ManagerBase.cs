@@ -1,4 +1,5 @@
-﻿using BusinessLayer.Context;
+﻿using System.Threading.Tasks;
+using BusinessLayer.Context;
 using Common.Interfaces;
 
 namespace BusinessLayer.Implementations
@@ -27,6 +28,19 @@ namespace BusinessLayer.Implementations
         {
             Context = context;
             LogManager = logManager;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizIdentityId"></param>
+        /// <returns></returns>
+        protected async Task<bool> IsQuizOwner(int userId, int quizIdentityId)
+        {
+            var quizIdentity = await Context.QuizIdentities.FindAsync(quizIdentityId);
+
+            return quizIdentity != null && quizIdentity.OwnerId == userId;
         }
     }
 }

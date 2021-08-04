@@ -25,6 +25,15 @@ namespace BusinessLayer.Interfaces
         /// <param name="userId"></param>
         /// <param name="quizId"></param>
         /// <param name="questionId"></param>
+        /// <returns></returns>
+        Task<List<Option>> GetQuestionOptions(int userId, int quizId, int questionId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizId"></param>
+        /// <param name="questionId"></param>
         /// <param name="question"></param>
         /// <returns></returns>
         Task<SaveQuizResult> UpdateQuestion(int userId, int quizId, int questionId, Question question);

@@ -33,6 +33,21 @@ namespace BusinessLayer.Implementations
         public async Task<List<Question>> GetQuizQuestions(int userId, int quizId)
         {
             //TODO: can the user see the questions? either assigned or the owner.
+
+            var quizDb = await Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
+
+            if (quizDb == null)
+            {
+                return null;
+            }
+
+            var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
+
+            if (!isOwner)
+            {
+                return null;
+            }
+
             var questions =
                 (from q in Context.Quizes
                  join qq in Context.QuizQuestions on q.Id equals qq.QuizId
@@ -44,10 +59,9 @@ namespace BusinessLayer.Implementations
 
             var questionOptions =
                 (from o in Context.Options
-                 join qo in Context.QuestionOptions on o.Id equals qo.OptionId
-                 join qq in Context.QuizQuestions on qo.QuestionId equals qq.QuestionId
+                 join qq in Context.QuizQuestions on o.QuestionId equals qq.QuestionId
                  where qq.QuizId == quizId
-                 select qo
+                 select o
                 ).ToList();
 
             foreach (var question in questions)
@@ -55,11 +69,52 @@ namespace BusinessLayer.Implementations
                 question.OptionIds = questionOptions
                     .Where(o => o.QuestionId == question.Id)
                     .OrderBy(o => o.OptionOrder)
-                    .Select(o => o.OptionId)
+                    .Select(o => o.Id)
                     .ToList();
             }
 
             return await Task.FromResult(questions);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="quizId"></param>
+        /// <param name="questionId"></param>
+        /// <returns></returns>
+        public async Task<List<Option>> GetQuestionOptions(int userId, int quizId, int questionId)
+        {
+            var quizDb = await Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
+
+            if (quizDb == null)
+            {
+                return null;
+            }
+
+            var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
+
+            if (!isOwner)
+            {
+                return null;
+            }
+
+            var question = await Context.QuizQuestions.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.QuizId == quizId);
+
+            if (question == null)
+            {
+                return null;
+            }
+
+            var questionOptions =
+                (from o in Context.Options
+                 join qq in Context.QuizQuestions on o.QuestionId equals qq.QuestionId
+                 where qq.QuizId == quizId
+                 orderby o.OptionOrder
+                 select o
+                ).ToList();
+
+            return questionOptions;
         }
 
         /// <summary>

@@ -150,14 +150,13 @@ namespace BusinessLayer.Implementations
 
             var questions = (await questionManager.GetQuizQuestions(attempt.UserId, attempt.QuizId)).ToList();
 
-            var options = (from qo in Context.QuestionOptions
-                           join qq in Context.QuizQuestions on qo.QuestionId equals qq.QuestionId
-                           join q in Context.Questions on qo.QuestionId equals q.Level
-                           join o in Context.Options on qo.OptionId equals o.Id
+            var options = (from qq in Context.QuizQuestions
+                           join q in Context.Questions on qq.QuestionId equals q.Id
+                           join o in Context.Options on q.Id equals o.QuestionId
                            join a in Context.Answers on new { AttemptId = attempt.Id, QuestionId = q.Id, OptionId = q.Id } equals new { a.AttemptId, a.QuestionId, a.OptionId } into ad
                            from a in ad.DefaultIfEmpty()
                            where qq.QuizId == attempt.QuizId
-                           select new QuestionAnswer { QuestionId = qo.QuestionId, IsCorrect = o.IsCorrect, IsMarked = a != null }
+                           select new QuestionAnswer { QuestionId = q.Id, IsCorrect = o.IsCorrect, IsMarked = a != null }
                           ).ToList();
 
             var evaluationResult = EvaluateQuiz(questions, options);

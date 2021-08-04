@@ -7,21 +7,6 @@ namespace BusinessLayer.Test
     [TestClass]
     public class QuestionManagerTest
     {
-        internal bool IsValid(Question question)
-        {
-            if (question == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(question.Body))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         [TestMethod]
         public void IsValidNull()
         {
@@ -47,11 +32,11 @@ namespace BusinessLayer.Test
 
 
         [DataTestMethod]
-        [DataRow(false, 0)]
-        [DataRow(true, 1)]
-        [DataRow(true, 3)]
-        [DataRow(true, 5)]
-        [DataRow(false, 6)]
+        [DataRow(false, (byte)0)]
+        [DataRow(true, (byte)1)]
+        [DataRow(true, (byte)3)]
+        [DataRow(true, (byte)5)]
+        [DataRow(false, (byte)6)]
         public void IsValidLevel(bool expected, byte level)
         {
             var actual = QuestionManager.IsValid(new Question
