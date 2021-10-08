@@ -114,7 +114,7 @@ namespace BusinessLayer.Test
             };
         }
 
-        internal static async Task<(int QuizId, int QuizIdentityId, List<int> QuestionIds, List<int> OptionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
+        internal static async Task<(int QuizId, int QuizIdentityId, int OwnerId, List<int> QuestionIds, List<int> OptionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
         {
             var logManager = Mock.Of<ILogManager>();
             var optionManager = new OptionManager(context, logManager);
@@ -148,7 +148,7 @@ namespace BusinessLayer.Test
                 }
             }
 
-            return (QuizId: quiz.QuizId, QuizIdentityId: quiz.QuizIdentityId,  QuestionIds: questionIds, OptionIds: optionIds);
+            return (QuizId: quiz.QuizId, QuizIdentityId: quiz.QuizIdentityId, OwnerId: userId, QuestionIds: questionIds, OptionIds: optionIds);
         }
 
         internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)

@@ -205,5 +205,36 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(SaveQuizResultStatus.NotAuthorized, result.Status);
         }
+
+        [TestMethod]
+        public async Task UpdateQuestion()
+        {
+            SaveQuizResult result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+
+                var question = (await sut.GetQuizQuestions(userId, testData.QuizId)).FirstOrDefault();
+                question.Body = "new text";
+
+                result = await sut.UpdateQuestion(testData.OwnerId, testData.QuizId, question.Id, question);
+            }
+
+            Assert.AreEqual(SaveQuizResultStatus.Success, result.Status);
+        }
     }
 }

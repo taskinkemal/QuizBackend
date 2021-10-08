@@ -42,12 +42,15 @@ namespace BusinessLayer.Implementations
 
             var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
-                .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
-
-            if (!isOwner && assignmentDb == null)
+            if (!isOwner)
             {
-                return null;
+                var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
+                    .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
+
+                if (assignmentDb == null)
+                {
+                    return null;
+                }
             }
 
             var questions =
@@ -97,12 +100,15 @@ namespace BusinessLayer.Implementations
 
             var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
-                .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
-
-            if (!isOwner && assignmentDb == null)
+            if (!isOwner)
             {
-                return null;
+                var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
+                    .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
+
+                if (assignmentDb == null)
+                {
+                    return null;
+                }
             }
 
             var question = await Context.QuizQuestions.AsQueryable().AsNoTracking()
