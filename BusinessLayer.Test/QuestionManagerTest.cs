@@ -133,6 +133,35 @@ namespace BusinessLayer.Test
         }
 
         [TestMethod]
+        public async Task GetQuizQuestionsNotOwnerNotAssigned()
+        {
+            List<Question> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, false);
+
+                var newAssignedUser = await ManagerTestHelper.AssignQuizAsync(context, quiz.QuizIdentityId);
+
+                result = await sut.GetQuizQuestions(Math.Max(testData.UserId, newAssignedUser) + 1, testData.QuizId);
+            }
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         public async Task GetQuestionOptions()
         {
             int questionCount;
