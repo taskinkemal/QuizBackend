@@ -416,7 +416,7 @@ namespace BusinessLayer.Test
         public void RoundScore(int userScore, int totalScore, string expected)
         {
             var actual = QuizAttemptManager.RoundScore(userScore, totalScore);
-            Assert.AreEqual(Convert.ToDecimal(expected), actual);
+            Assert.AreEqual(Convert.ToDecimal(expected, new System.Globalization.CultureInfo("en-US")), actual);
         }
 
         [TestMethod]

@@ -32,8 +32,6 @@ namespace BusinessLayer.Implementations
         /// <returns></returns>
         public async Task<List<Question>> GetQuizQuestions(int userId, int quizId)
         {
-            //TODO: can the user see the questions? either assigned or the owner.
-
             var quizDb = await Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
 
             if (quizDb == null)
@@ -43,7 +41,10 @@ namespace BusinessLayer.Implementations
 
             var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            if (!isOwner)
+            var attemptDb = await Context.QuizAttempts.AsQueryable().AsNoTracking()
+                .FirstOrDefaultAsync(q => q.QuizId == quizId && q.UserId == userId);
+
+            if (!isOwner && attemptDb == null)
             {
                 return null;
             }
