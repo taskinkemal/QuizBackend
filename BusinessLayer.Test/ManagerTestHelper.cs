@@ -93,11 +93,11 @@ namespace BusinessLayer.Test
             };
         }
 
-        internal static Question CreateQuestion(int testId, QuestionType type = QuestionType.MultiSelect, byte level = 3)
+        internal static Question CreateQuestion(int quizId, QuestionType type = QuestionType.MultiSelect, byte level = 3)
         {
             return new Question
             {
-                Body = "Question Body " + testId,
+                Body = "Question Body " + quizId,
                 Type = type,
                 Level = level
             };
@@ -114,7 +114,7 @@ namespace BusinessLayer.Test
             };
         }
 
-        internal static async Task<(int QuizId, List<int> QuestionIds, List<int> OptionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
+        internal static async Task<(int QuizId, int QuizIdentityId, List<int> QuestionIds, List<int> OptionIds)> CreateQuizAsync(QuizContext context, int questionCount, int optionCount)
         {
             var logManager = Mock.Of<ILogManager>();
             var optionManager = new OptionManager(context, logManager);
@@ -124,7 +124,7 @@ namespace BusinessLayer.Test
 
             var userId = await userManager.InsertUserInternalAsync(CreateUserTo(0), true);
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(0));
-            var quizId = (await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(1))).QuizId;
+            var quiz = (await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(1)));
             await quizManager.InsertQuizInternalAsync(userId, CreateQuiz(2));
 
             var questionIds = new List<int>();
@@ -133,7 +133,7 @@ namespace BusinessLayer.Test
             for (var i = 0; i < questionCount; i++)
             {
                 var questionId = await questionManager.InsertQuestionInternalAsync(CreateQuestion(i));
-                await questionManager.AssignQuestionInternalAsync(quizId, questionId);
+                await questionManager.AssignQuestionInternalAsync(quiz.QuizId, questionId);
 
                 questionIds.Add(questionId);
 
@@ -148,7 +148,7 @@ namespace BusinessLayer.Test
                 }
             }
 
-            return (QuizId: quizId, QuestionIds: questionIds, OptionIds: optionIds);
+            return (QuizId: quiz.QuizId, QuizIdentityId: quiz.QuizIdentityId,  QuestionIds: questionIds, OptionIds: optionIds);
         }
 
         internal static async Task<(int QuizId, int UserId)> CreateAndAssignQuizAsync(QuizContext context, Quiz quiz, bool assignUser)

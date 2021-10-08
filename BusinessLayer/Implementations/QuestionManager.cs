@@ -33,18 +33,19 @@ namespace BusinessLayer.Implementations
         public async Task<List<Question>> GetQuizQuestions(int userId, int quizId)
         {
             var quizDb = await Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
+            var userTo = await Context.Users.AsQueryable().AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (quizDb == null)
+            if (quizDb == null || userTo == null)
             {
                 return null;
             }
 
             var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            var attemptDb = await Context.QuizAttempts.AsQueryable().AsNoTracking()
-                .FirstOrDefaultAsync(q => q.QuizId == quizId && q.UserId == userId);
+            var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
+                .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
 
-            if (!isOwner && attemptDb == null)
+            if (!isOwner && assignmentDb == null)
             {
                 return null;
             }
@@ -87,20 +88,25 @@ namespace BusinessLayer.Implementations
         public async Task<List<Option>> GetQuestionOptions(int userId, int quizId, int questionId)
         {
             var quizDb = await Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
+            var userTo = await Context.Users.AsQueryable().AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (quizDb == null)
+            if (quizDb == null || userTo == null)
             {
                 return null;
             }
 
             var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            if (!isOwner)
+            var assignmentDb = await Context.QuizAssignments.AsQueryable().AsNoTracking()
+                .FirstOrDefaultAsync(q => q.QuizIdentityId == quizDb.QuizIdentityId && q.Email == userTo.Email);
+
+            if (!isOwner && assignmentDb == null)
             {
                 return null;
             }
 
-            var question = await Context.QuizQuestions.AsQueryable().AsNoTracking().FirstOrDefaultAsync(q => q.QuizId == quizId);
+            var question = await Context.QuizQuestions.AsQueryable().AsNoTracking()
+                .FirstOrDefaultAsync(q => q.QuizId == quizId && q.QuestionId == questionId);
 
             if (question == null)
             {
@@ -110,7 +116,7 @@ namespace BusinessLayer.Implementations
             var questionOptions =
                 (from o in Context.Options
                  join qq in Context.QuizQuestions on o.QuestionId equals qq.QuestionId
-                 where qq.QuizId == quizId
+                 where qq.QuizId == quizId && qq.QuestionId == questionId
                  orderby o.OptionOrder
                  select o
                 ).ToList();
