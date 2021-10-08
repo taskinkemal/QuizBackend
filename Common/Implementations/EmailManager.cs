@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Mail;
+﻿using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using Common.Interfaces;
 using Microsoft.Extensions.Options;
@@ -32,7 +31,6 @@ namespace Common.Implementations
         /// <param name="email"></param>
         /// <param name="subject"></param>
         /// <param name="body"></param>
-        [ExcludeFromCodeCoverage]
         public void Send(string email, string subject, string body)
         {
             var message = CreateMailMessage(Settings.From, email, subject, body);

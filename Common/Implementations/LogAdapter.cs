@@ -3,14 +3,12 @@ using Common.Interfaces;
 using Serilog;
 using Serilog.Events;
 using Microsoft.Extensions.Configuration;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Common.Implementations
 {
     /// <summary>
     /// 
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class LogAdapter : ILogAdapter
     {
         private readonly ILogger logger;
