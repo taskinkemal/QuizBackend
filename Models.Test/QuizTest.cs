@@ -106,6 +106,7 @@ namespace Models.Test
                 Intro = "Quiz Intro",
                 Version = 3,
                 Id = 55,
+                ShowResults = new DateTime(2020, 1, 1),
                 QuestionIds = new [] { 5, 6}
             };
 
@@ -117,6 +118,7 @@ namespace Models.Test
             Assert.AreEqual(QuizStatus.Inactive, quiz.Status);
             Assert.AreEqual("Quiz Title", quiz.Title);
             Assert.AreEqual("Quiz Intro", quiz.Intro);
+            Assert.AreEqual(2020, quiz.ShowResults.Value.Year);
             Assert.AreEqual(3, quiz.Version);
             Assert.AreEqual(55, quiz.Id);
             Assert.IsTrue(quiz.QuestionIds.Contains(5));
