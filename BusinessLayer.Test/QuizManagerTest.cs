@@ -577,6 +577,7 @@ namespace BusinessLayer.Test
         [DataRow(true, false, null, 20, 2020, null)]
         [DataRow(true, false, null, 20, null, 2021)]
         [DataRow(true, false, null, 20, 2019, 2021)]
+        [DataRow(true, false, null, 20, 2020, 2020)]
         [DataRow(false, false, null, 20, 2021, 2020)]
         [DataRow(false, true, null, 20, null, null)]
         [DataRow(false, true, -10, 20, null, null)]

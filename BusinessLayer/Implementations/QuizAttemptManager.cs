@@ -46,7 +46,7 @@ namespace BusinessLayer.Implementations
                 };
             }
 
-            if (quiz.AvailableTo != null && quiz.AvailableTo < DateTime.Now)
+            if (quiz.AvailableTo.HasValue && quiz.AvailableTo < DateTime.Now)
             {
                 return new CreateAttemptResponse
                 {
@@ -312,7 +312,7 @@ namespace BusinessLayer.Implementations
                 return (attempt, quiz, response);
             }
 
-            if (quiz.AvailableTo != null && quiz.AvailableTo < DateTime.Now)
+            if (quiz.AvailableTo.HasValue && quiz.AvailableTo < DateTime.Now)
             {
                 await FinishQuizAsync(attempt, quiz.PassScore, timeSpent);
 
