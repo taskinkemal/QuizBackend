@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WebApplication
 {
@@ -12,6 +13,7 @@ namespace WebApplication
         /// 
         /// </summary>
         /// <param name="args"></param>
+        [ExcludeFromCodeCoverage]
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
