@@ -216,10 +216,10 @@ namespace BusinessLayer.Test
                 };
 
                 var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
-                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+                var user = await ManagerTestHelper.AddUserAsync(context, 5);
 
                 questionCount = testData.QuestionIds.Count;
-                result = await sut.GetQuestionOptions(userId, testData.QuizId + 1, testData.QuestionIds[2]);
+                result = await sut.GetQuestionOptions(user.Id, 56, 32);
             }
 
             Assert.IsNull(result);

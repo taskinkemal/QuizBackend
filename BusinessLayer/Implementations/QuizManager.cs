@@ -245,9 +245,9 @@ namespace BusinessLayer.Implementations
                 return false;
             }
 
-            if (quiz.AvailableFrom.HasValue && quiz.AvailableTo.HasValue && quiz.AvailableFrom > quiz.AvailableTo)
+            if (quiz.AvailableFrom.HasValue && quiz.AvailableTo.HasValue)
             {
-                return false;
+                return quiz.AvailableFrom <= quiz.AvailableTo;
             }
 
             return true;
