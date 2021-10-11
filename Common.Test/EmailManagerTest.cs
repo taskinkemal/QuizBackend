@@ -109,7 +109,6 @@ namespace Common.Test
             }
 
             Assert.IsTrue(innerException is System.Net.Sockets.SocketException);
-            Assert.AreEqual("No such host is known.", innerException.Message);
         }
     }
 }
