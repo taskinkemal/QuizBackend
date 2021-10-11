@@ -116,6 +116,47 @@ namespace BusinessLayer.Test
         }
 
         [TestMethod]
+        public async Task UpdateStatusAvailableIntervalNotPassed()
+        {
+            UpdateQuizAttemptResponse result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var attempt = await context.QuizAttempts.AddAsync(
+                    new QuizAttempt
+                    {
+                        QuizId = testData.QuizId,
+                        UserId = testData.UserId,
+                        Status = QuizAttemptStatus.Incomplete,
+                        StartDate = DateTime.Now
+                    });
+                await context.SaveChangesAsync();
+
+                result = await sut.UpdateStatus(testData.UserId, attempt.Entity.Id, new UpdateQuizAttemptStatus
+                {
+                    TimeSpent = 30,
+                    EndQuiz = false
+                });
+            }
+
+            Assert.AreEqual(UpdateQuizAttemptStatusResult.Success, result.Result);
+            Assert.AreEqual(QuizAttemptStatus.Incomplete, result.Attempt.Status);
+            Assert.AreEqual(30, result.Attempt.TimeSpent);
+        }
+
+        [TestMethod]
         public async Task UpdateStatusStatusNotIncomplete()
         {
             UpdateQuizAttemptResponse result;
@@ -272,6 +313,30 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(CreateAttemptResult.DateError, result.Result);
             Assert.IsNull(result.Attempt);
+        }
+
+        [TestMethod]
+        public async Task CreateAttemptQuizAvailable()
+        {
+            CreateAttemptResponse result;
+
+            var quiz = new Quiz
+            {
+                Title = "title",
+                Intro = "intro",
+                AvailableTo = DateTime.Now.AddDays(1)
+            };
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, true);
+                var sut = new QuizAttemptManager(context, new QuestionManager(context, logManager), logManager);
+                result = await sut.CreateAttempt(testData.UserId, testData.QuizId);
+            }
+
+            Assert.AreEqual(CreateAttemptResult.Success, result.Result);
+            Assert.IsNotNull(result.Attempt);
         }
 
         [TestMethod]

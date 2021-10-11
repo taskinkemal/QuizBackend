@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Context;
 using BusinessLayer.Implementations;
+using BusinessLayer.Interfaces;
 using Common.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.DbModels;
@@ -141,6 +142,7 @@ namespace BusinessLayer.Test
             {
                 var logManager = Mock.Of<ILogManager>();
                 var sut = new QuestionManager(context, logManager);
+                var userManager = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
 
                 var quiz = new Quiz
                 {
@@ -154,8 +156,9 @@ namespace BusinessLayer.Test
                 var testData = await ManagerTestHelper.CreateAndAssignQuizAsync(context, quiz, false);
 
                 var newAssignedUser = await ManagerTestHelper.AssignQuizAsync(context, quiz.QuizIdentityId);
+                var unassignedUserId = await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
 
-                result = await sut.GetQuizQuestions(Math.Max(testData.UserId, newAssignedUser) + 1, testData.QuizId);
+                result = await sut.GetQuizQuestions(unassignedUserId, testData.QuizId);
             }
 
             Assert.IsNull(result);
@@ -190,6 +193,128 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(3, questionCount);
             Assert.AreEqual(8, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetQuestionOptionsQuizNotFound()
+        {
+            int questionCount;
+            List<Option> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+
+                questionCount = testData.QuestionIds.Count;
+                result = await sut.GetQuestionOptions(userId, testData.QuizId + 1, testData.QuestionIds[2]);
+            }
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetQuestionOptionsUserNotFound()
+        {
+            int questionCount;
+            List<Option> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+
+                questionCount = testData.QuestionIds.Count;
+                result = await sut.GetQuestionOptions(Math.Max(testData.OwnerId, userId) + 1, testData.QuizId, testData.QuestionIds[2]);
+            }
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetQuestionOptionsNotAssigned()
+        {
+            int questionCount;
+            List<Option> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+                var userManager = ManagerTestHelper.GetUserManager(context, Mock.Of<IAuthManager>(), logManager);
+                var unassignedUserId = await userManager.InsertUserInternalAsync(ManagerTestHelper.CreateUserTo(1), true);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+
+                questionCount = testData.QuestionIds.Count;
+                result = await sut.GetQuestionOptions(unassignedUserId, testData.QuizId, testData.QuestionIds[2]);
+            }
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetQuestionOptionsQuestionNotFound()
+        {
+            int questionCount;
+            List<Option> result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+                var userId = await ManagerTestHelper.AssignQuizAsync(context, testData.QuizIdentityId);
+
+                questionCount = testData.QuestionIds.Count;
+                result = await sut.GetQuestionOptions(userId, testData.QuizId, testData.QuestionIds.Max() + 1);
+            }
+
+            Assert.IsNull(result);
         }
 
         [TestMethod]
