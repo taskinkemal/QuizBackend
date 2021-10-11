@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
 using WebCommon;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WebApplication
 {
@@ -85,6 +86,7 @@ namespace WebApplication
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
+        [ExcludeFromCodeCoverage]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             ConfigureInternal(app, env.IsDevelopment(), app =>
