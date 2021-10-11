@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Mail;
 using Common.Implementations;
 using Microsoft.Extensions.Options;
@@ -70,6 +71,45 @@ namespace Common.Test
             Assert.AreEqual(1, mailMessage.To.Count);
             Assert.AreEqual(email, mailMessage.To.FirstOrDefault()?.Address);
             Assert.IsTrue(mailMessage.IsBodyHtml);
+        }
+
+        [TestMethod]
+        public void SmtpSendIsCalled()
+        {
+            const string from = "test.from@mail.com";
+            const string host = "testhost";
+            const string user = "testuser";
+            const string password = "testpassword";
+
+            var settings = new AppSettings
+            {
+                Email = new EmailSettings
+                {
+                    From = from,
+                    Host = host,
+                    User = user,
+                    Password = password
+                }
+            };
+
+            var options = new Mock<IOptions<AppSettings>>();
+            options.SetupGet(c => c.Value).Returns(settings);
+
+            var sut = new EmailManager(options.Object);
+
+            Exception innerException = new Exception();
+
+            try
+            {
+                sut.Send("test@test.com", "subject", "body");
+            }
+            catch (System.Net.Mail.SmtpException exc)
+            {
+                innerException = exc.InnerException;
+            }
+
+            Assert.IsTrue(innerException is System.Net.Sockets.SocketException);
+            Assert.AreEqual("No such host is known.", innerException.Message);
         }
     }
 }
