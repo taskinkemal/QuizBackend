@@ -632,5 +632,38 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(expected, result);
         }
+
+        [TestMethod]
+        public async Task DeleteQuizQuizNotFound()
+        {
+            bool result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = new QuizManager(context, Mock.Of<IQuizAttemptManager>(), Mock.Of<ILogManager>());
+
+                result = await sut.DeleteQuiz(43, 54);
+            }
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task DeleteQuizNotOwner()
+        {
+            int ownerId = 43;
+            bool result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var sut = new QuizManager(context, Mock.Of<IQuizAttemptManager>(), Mock.Of<ILogManager>());
+
+                var insertResult = await sut.InsertQuizInternalAsync(ownerId, ManagerTestHelper.CreateQuiz(0));
+
+                result = await sut.DeleteQuiz(ownerId + 1, insertResult.QuizId);
+            }
+
+            Assert.IsFalse(result);
+        }
     }
 }

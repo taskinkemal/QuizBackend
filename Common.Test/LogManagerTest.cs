@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using Common.Implementations;
 using Common.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog.Events;
@@ -158,6 +161,48 @@ namespace Common.Test
             Assert.AreEqual(category, actualCategory);
             Assert.AreSame(exception, actualException);
             Assert.AreEqual(1, actualArgs.Length);
+        }
+
+        [TestMethod]
+        public void LogAdapterDoesntCrash()
+        {
+            var sut = new LogAdapter(GetLogConfiguration());
+
+            sut.Write(LogEventLevel.Information, new Exception(), "");
+
+            Assert.IsTrue(true);
+        }
+
+        private static IConfigurationRoot GetLogConfiguration()
+        {
+            var jsonContent = $@"
+            {{
+              ""Logging"": {{
+                ""IncludeScopes"": false,
+                ""LogLevel"": {{
+                  ""Default"": ""Warning""
+                }}
+              }},
+              ""Serilog"": {{
+                ""MinimumLevel"": {{
+                  ""Default"": ""Information"",
+                  ""Override"": {{
+                    ""Microsoft.EntityFrameworkCore"": ""Warning"",
+                    ""Microsoft.AspNetCore"": ""Warning""
+                  }}
+                }},
+                ""Enrich"": [ ""FromLogContext"" ],
+                ""WriteTo"": []
+              }},
+              ""AllowedHosts"": ""*""
+            }}
+            ";
+
+            byte[] byteArray = Encoding.ASCII.GetBytes(jsonContent);
+            using var stream = new MemoryStream(byteArray);
+            return new ConfigurationBuilder()
+                .AddJsonStream(stream)
+                .Build();
         }
     }
 }
