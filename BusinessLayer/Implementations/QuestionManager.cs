@@ -40,7 +40,7 @@ namespace BusinessLayer.Implementations
                 return null;
             }
 
-            var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
+            var isOwner = await IsQuizOwner(userId, quizDb.QuizIdentityId);
 
             if (!isOwner)
             {
@@ -98,7 +98,7 @@ namespace BusinessLayer.Implementations
                 return null;
             }
 
-            var isOwner = await base.IsQuizOwner(userId, quizDb.QuizIdentityId);
+            var isOwner = await IsQuizOwner(userId, quizDb.QuizIdentityId);
 
             if (!isOwner)
             {
@@ -156,7 +156,7 @@ namespace BusinessLayer.Implementations
                 };
             }
 
-            var authorizationResult = AuthorizeQuestionUpdateRequest(userId, quizId, questionId);
+            var authorizationResult = await AuthorizeQuestionUpdateRequest(userId, quizId, questionId);
 
             if (authorizationResult != SaveQuizResultStatus.Success)
             {
@@ -184,7 +184,7 @@ namespace BusinessLayer.Implementations
             };
         }
 
-        internal SaveQuizResultStatus AuthorizeQuestionUpdateRequest(int userId, int quizId, int questionId)
+        internal async Task<SaveQuizResultStatus> AuthorizeQuestionUpdateRequest(int userId, int quizId, int questionId)
         {
             var quizDb = Context.Quizes.AsQueryable().AsNoTracking().FirstOrDefault(q => q.Id == quizId);
             var quizQuestionDb = Context.QuizQuestions.AsQueryable().AsNoTracking().FirstOrDefault(q => q.QuizId == quizId && q.QuestionId == questionId);
@@ -199,14 +199,9 @@ namespace BusinessLayer.Implementations
                 return SaveQuizResultStatus.GeneralError;
             }
 
-            var quizIdentityDb = Context.QuizIdentities.AsQueryable().AsNoTracking().FirstOrDefault(q => q.Id == quizDb.QuizIdentityId);
+            var isOwner = await IsQuizOwner(userId, quizDb.QuizIdentityId);
 
-            if (quizIdentityDb == null)
-            {
-                return SaveQuizResultStatus.GeneralError;
-            }
-
-            if (quizIdentityDb.OwnerId != userId)
+            if (!isOwner)
             {
                 return SaveQuizResultStatus.NotAuthorized;
             }

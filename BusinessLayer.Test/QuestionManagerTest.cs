@@ -329,5 +329,75 @@ namespace BusinessLayer.Test
 
             Assert.AreEqual(SaveQuizResultStatus.Success, result.Status);
         }
+
+        [TestMethod]
+        public async Task AuthorizeQuestionUpdateRequestQuizNotFound()
+        {
+            SaveQuizResultStatus result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                result = await sut.AuthorizeQuestionUpdateRequest(5, 11, 53);
+            }
+
+            Assert.AreEqual(SaveQuizResultStatus.GeneralError, result);
+        }
+
+        [TestMethod]
+        public async Task AuthorizeQuestionUpdateRequestQuestionNotFound()
+        {
+            SaveQuizResultStatus result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+
+                result = await sut.AuthorizeQuestionUpdateRequest(testData.OwnerId, testData.QuizId, testData.QuestionIds.Max() + 1);
+            }
+
+            Assert.AreEqual(SaveQuizResultStatus.GeneralError, result);
+        }
+
+        [TestMethod]
+        public async Task AuthorizeQuestionUpdateRequestNotOwner()
+        {
+            SaveQuizResultStatus result;
+
+            using (var context = new QuizContext(ManagerTestHelper.Options))
+            {
+                var logManager = Mock.Of<ILogManager>();
+                var sut = new QuestionManager(context, logManager);
+
+                var quiz = new Quiz
+                {
+                    Title = "title",
+                    Intro = "intro",
+                    TimeConstraint = true,
+                    TimeLimitInSeconds = 40,
+                    AvailableTo = DateTime.Now.AddDays(1)
+                };
+
+                var testData = await ManagerTestHelper.CreateQuizAsync(context, 3, 8);
+
+                result = await sut.AuthorizeQuestionUpdateRequest(testData.OwnerId + 1, testData.QuizId, testData.QuestionIds.First());
+            }
+
+            Assert.AreEqual(SaveQuizResultStatus.NotAuthorized, result);
+        }
     }
 }
