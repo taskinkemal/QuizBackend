@@ -156,6 +156,8 @@ namespace WebApplication
                         Name = "Authorization",
                         Type = SecuritySchemeType.ApiKey
                     });
+
+                options.CustomSchemaIds(type => type.ToString());
             });
 
             services.ConfigureSwaggerGen(options =>
